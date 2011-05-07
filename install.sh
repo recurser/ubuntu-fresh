@@ -56,6 +56,7 @@ sudo aptitude install \
     apache2 \
     autoconf \
     build-essential \
+    exuberant-ctags \
     fail2ban \
     fakeroot \
     gcc \
@@ -101,31 +102,6 @@ sudo updatedb
 
 #--------------------------------------------------------------------
 #
-# S E T   U P   U S E R   A C C O U N T
-#
-#--------------------------------------------------------------------
-if [ `grep $user /etc/passwd | wc -l` -eq 0 ]; then
-    echo "\n\n Adding a new user '$user' - please enter a password at the prompt."
-    sudo adduser --home /users/$user $user
-    mkdir -p /users/$user
-    chown $user:$user /users/$user
-    
-    # Set up zsh and vim config etc.
-    cd /tmp
-    rm -Rf home-config
-    git clone git://github.com/recurser/home-config.git
-    cd home-config
-    sudo ./install.sh $user
-fi;
-
-# Make zsh the default shell.
-if ! id $user > /dev/null 2>&1; then
-    chsh user /usr/bin/zsh
-fi
-
-
-#--------------------------------------------------------------------
-#
 # I N S T A L L   G E M S
 #
 #--------------------------------------------------------------------
@@ -147,5 +123,31 @@ sudo gem install --no-rdoc --no-ri \
     
 # Setup rvm
 su root -c "bash < <(curl -s -B https://rvm.beginrescueend.com/install/rvm)"
+
+
+#--------------------------------------------------------------------
+#
+# S E T   U P   U S E R   A C C O U N T
+#
+#--------------------------------------------------------------------
+if [ `grep $user /etc/passwd | wc -l` -eq 0 ]; then
+    echo "\n\n Adding a new user '$user' - please enter a password at the prompt."
+    sudo adduser --home /users/$user $user
+    mkdir -p /users/$user
+    chown $user:$user /users/$user
+    
+    # Set up zsh and vim config etc.
+    chsh -s /usr/bin/zsh $user
+    cd /tmp
+    rm -Rf home-config
+    git clone git://github.com/recurser/home-config.git
+    cd home-config
+    sudo ./install.sh $user
+fi;
+
+# Make zsh the default shell.
+if ! id $user > /dev/null 2>&1; then
+    chsh user /usr/bin/zsh
+fi
 
 
