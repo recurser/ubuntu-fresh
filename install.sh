@@ -32,27 +32,27 @@ is_installed() {
 # Read in the user name.
 while [ "_$user" == "_" ]; do
     echo -n "What username would you like to use? "
-    read user
+    read $user
 done 
 confirm $user
 
 # Read in the domain name.
 while [ "_$domain" == "_" ]; do
     echo -n "What domain would you like to access your server with? "
-    read domain
+    read $domain
 done 
 confirm $domain
 # Read in the full name.
 while [ "$full_name" == "" ]; do
     echo -n "What is your full name? "
-    read full_name
+    read $full_name
 done 
 confirm $full_name
 
 # Read in the full email address.
 while [ "$email" == "" ]; do
     echo -n "What is your email address? "
-    read email
+    read $email
 done 
 confirm $email
 
