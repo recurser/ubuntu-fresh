@@ -110,13 +110,14 @@ sudo sed -ri "s|UseDNS yes|UseDNS no|" /etc/ssh/sshd_config
 sudo sed -ri "s|UsePAM yes|UsePAM no|" /etc/ssh/sshd_config
 if [ `grep PermitRootLogin /etc/ssh/sshd_config | wc -l` -eq 0 ]; then
     #su root -c "echo -n \"PermitRootLogin no\n\" >> /etc/ssh/sshd_config"
-fi; 
+    echo skipping...
+fi
 if [ `grep X11Forwarding /etc/ssh/sshd_config | wc -l` -eq 0 ]; then
     su root -c "echo -n \"X11Forwarding no\n\" >> /etc/ssh/sshd_config"
-fi; 
+fi
 if [ `grep UsePAM /etc/ssh/sshd_config | wc -l` -eq 0 ]; then
     su root -c "echo -n \"UsePam no\n\" >> /etc/ssh/sshd_config"
-fi; 
+fi
 if [ `grep UseDNS /etc/ssh/sshd_config | wc -l` -eq 0 ]; then
         su root -c "echo -n \"UseDNS no\n\" >> /etc/ssh/sshd_config"
 fi;
@@ -127,7 +128,7 @@ fi;
 
 #--------------------------------------------------------------------
 #
-# I P T A B L E S
+# I P T A B L E S   R U L E S
 #
 #--------------------------------------------------------------------
 if [! -f /etc/iptables.up.rules ]; then
@@ -136,7 +137,7 @@ if [! -f /etc/iptables.up.rules ]; then
     if [ `grep iptables-restore /etc/network/interfaces | wc -l` -eq 0 ]; then
         sudo sed -ri "s|iface lo inet loopback|iface lo inet loopback\npre-up iptables-restore < /etc/iptables.up.rules|" /etc/network/interfaces
         sudo /etc/init.d/ssh reload
-    fi;
+    fi
 fi
 
 
@@ -161,7 +162,7 @@ sudo gem install --no-rdoc --no-ri \
     rvm \
     rake
     
-# Setup rvm
+# Setup rvm.
 su root -c "bash < <(curl -s -B https://rvm.beginrescueend.com/install/rvm)"
 
 
