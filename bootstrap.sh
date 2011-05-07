@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 if [ $(which git | wc -l) -eq 0 ]; then
     echo "Installing git..."
