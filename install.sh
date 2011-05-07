@@ -109,6 +109,13 @@ if [ `grep $user /etc/passwd | wc -l` -eq 0 ]; then
     sudo adduser --home /users/$user $user
     mkdir -p /users/$user
     chown $user:$user /users/$user
+    
+    # Set up zsh and vim config etc.
+    cd /tmp
+    rm -Rf home-config
+    git clone git://github.com/recurser/home-config.git
+    cd home-config
+    sudo ./install.sh $user
 fi;
 
 # Make zsh the default shell.
