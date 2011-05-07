@@ -104,13 +104,12 @@ sudo updatedb
 # S S H   C O N F I G
 #
 #--------------------------------------------------------------------
-#sudo sed -ri "s|PermitRootLogin yes|PermitRootLogin no|" /etc/ssh/sshd_config
+sudo sed -ri "s|PermitRootLogin yes|PermitRootLogin no|" /etc/ssh/sshd_config
 sudo sed -ri "s|X11Forwarding yes|X11Forwarding no|" /etc/ssh/sshd_config
 sudo sed -ri "s|UseDNS yes|UseDNS no|" /etc/ssh/sshd_config
 sudo sed -ri "s|UsePAM yes|UsePAM no|" /etc/ssh/sshd_config
 if [ `grep PermitRootLogin /etc/ssh/sshd_config | wc -l` -eq 0 ]; then
-    #su root -c "echo -n \"PermitRootLogin no\n\" >> /etc/ssh/sshd_config"
-    echo skipping...
+    su root -c "echo -n \"PermitRootLogin no\n\" >> /etc/ssh/sshd_config"
 fi
 if [ `grep X11Forwarding /etc/ssh/sshd_config | wc -l` -eq 0 ]; then
     su root -c "echo \"X11Forwarding no\" >> /etc/ssh/sshd_config"
@@ -132,7 +131,7 @@ fi;
 #
 #--------------------------------------------------------------------
 sudo /bin/hostname $domain
-sudo sed -ri "s|^127\.0\.0\.1 localhost.*$|127.0.0.1 localhost $domain|"
+sudo sed -ri "s|^127\.0\.0\.1 localhost.*$|127.0.0.1 localhost $domain|" /etc/hosts
 
 
 #--------------------------------------------------------------------
