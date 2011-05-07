@@ -154,7 +154,14 @@ fi
 # I N S T A L L   G E M S
 #
 #--------------------------------------------------------------------
-if [ $(which gem | wc -l) -eq 0 -o `gem --version` != "1.7.2" ]; then
+install_rubygems=0
+if [ $(which gem | wc -l) -eq 0 ]: thn
+    install_rubygems=1
+elsif [ `gem --version` != "1.7.2" ]; then
+    install_rubygems=1
+fi
+
+if [ $install_rubygems -eq 1 ]; then
     cd /tmp
     wget http://production.cf.rubygems.org/rubygems/rubygems-1.7.2.tgz
     tar xvzf rubygems-1.7.2.tgz
