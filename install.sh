@@ -104,7 +104,12 @@ sudo aptitude install \
     screen \
     subversion \
     telnet \
-    vim-full \
+    vim \
+    vim-perl \
+    vim-python \
+    vim-rails \
+    vim-ruby \
+    vim-scripts \
     wget \
     zsh
     
@@ -119,9 +124,9 @@ updatedb
 #--------------------------------------------------------------------
 if [ `grep $user /etc/passwd | wc -l` -eq 0 ]; then
     echo "\n\n Adding a new user '$user' - please enter a password at the prompt."
-    mkdir /users/$user
+    sudo adduser --home /users/$user $user
+    mkdir -p /users/$user
     chown $user:$user /users/$user
-    sudo adduser -d /users/$user $user
 fi;
 
 # Make zsh the default shell.
