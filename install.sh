@@ -1,5 +1,6 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
+CURR_DIR=$(cd `dirname $0` && pwd)
 
 #--------------------------------------------------------------------
 #
@@ -51,9 +52,7 @@ sudo apt-get update
 sudo apt-get upgrade
 
 sudo aptitude install \
-    ant \
     apache2 \
-    autoconf \
     build-essential \
     exuberant-ctags \
     fail2ban \
@@ -84,6 +83,7 @@ sudo aptitude install \
     php5-mysql \
     ruby \
     ruby-dev \
+    rvm \
     screen \
     subversion \
     telnet \
@@ -141,7 +141,7 @@ sudo sed -ri "s|^127\.0\.0\.1 localhost.*$|127.0.0.1 localhost $domain|" /etc/ho
 #--------------------------------------------------------------------
 if [ ! -f /etc/iptables.up.rules ]; then
     sudo iptables-restore < conf/iptables.up.rules
-    sudo cp conf/iptables.up.rules /etc/iptables.up.rules
+    sudo cp ${CURR_DIR}/conf/iptables.up.rules /etc/iptables.up.rules
 fi
 if [ `grep iptables-restore /etc/network/interfaces | wc -l` -eq 0 ]; then
     sudo sed -ri "s|iface lo inet loopback|iface lo inet loopback\npre-up iptables-restore < /etc/iptables.up.rules|" /etc/network/interfaces
@@ -212,13 +212,13 @@ fi
 #--------------------------------------------------------------------
 if [ ! -f /etc/apache2/sites-available/${domain} ]; then
     su root -c "echo \"Listen 8080\" > /etc/apache2/ports.conf"
-    sudo cp conf/apache-default.conf /etc/apache2/sites-available/default
-    sudo cp conf/apache-domain.conf /etc/apache2/sites-available/${domain}
+    sudo cp ${CURR_DIR}/conf/apache-default.conf /etc/apache2/sites-available/default
+    sudo cp ${CURR_DIR}/conf/apache-domain.conf /etc/apache2/sites-available/${domain}
     sudo ln -s /etc/apache2/sites-available/${domain} /etc/apache2/sites-enabled/001-${domain}
     sudo sed -ri "s|__DOMAIN__|${domain}|g" /etc/apache2/sites-available/${domain}
     
     sudo mkdir -p /var/www/${domain}/
-    sudo cp conf/index.html /var/www/${domain}/
+    sudo cp ${CURR_DIR}/conf/index.html /var/www/${domain}/
     sudo sed -ri "s|__DOMAIN__|${domain}|g" /var/www/${domain}/index.html
     
     sudo /etc/init.d/apache2 restart
@@ -231,7 +231,7 @@ fi
 #
 #--------------------------------------------------------------------
 if [ ! -f /etc/nginx/sites-available/${domain} ]; then
-    sudo cp conf/nginx-domain.conf /etc/nginx/sites-available/${domain}
+    sudo cp ${CURR_DIR}/conf/nginx-domain.conf /etc/nginx/sites-available/${domain}
     sudo ln -s /etc/nginx/sites-available/${domain} /etc/nginx/sites-enabled/001-${domain}
     sudo sed -ri "s|__DOMAIN__|001-${domain}|g" /etc/nginx/sites-available/${domain}
     
