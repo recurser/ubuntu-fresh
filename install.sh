@@ -2,16 +2,15 @@
 
 # Displays a confirm prompt for the given input.
 confirm() {
-    echo -n "You entered $@ - is this correct? (Y/n)"
-    read answer
-    for response in n N no No NO; do
+    read -p "You entered $@ - is this correct? (y/N) " answer
+    for response in y Y yes Yes YES; do
         if [ "_$answer" == "_$response" ]; then
-            echo "Cancelling..."
-            exit 1
+            return 1
         fi
     done
     
-    return 1
+    echo "Cancelling..."
+    exit 1
 }
 
 # Checks if the given command is installed.
@@ -30,32 +29,29 @@ is_installed() {
 #--------------------------------------------------------------------
 
 # Read in the user name.
-while [ "_$user" == "_" ]; do
-    echo -n "What username would you like to use? "
-    read user
+while [ -z "$user" ]; do
+    read -p "What username would you like to use? " user
 done
 
 confirm $user
 
 # Read in the domain name.
-while [ "_$domain" == "_" ]; do
-    echo -n "What domain would you like to access your server with? "
-    read domain
+while [ -z "$domain" ]; do
+    read -p "What domain would you like to access your server with? " domain
 done
 
 confirm $domain
+
 # Read in the full name.
-while [ "$full_name" == "" ]; do
-    echo -n "What is your full name? "
-    read full_name
+while [ -z "$full_name" ]; do
+    read -p "What is your full name? " full_name
 done
 
 confirm $full_name
 
 # Read in the full email address.
-while [ "$email" == "" ]; do
-    echo -n "What is your email address? "
-    read email
+while [ -z "$email" ]; do
+    read -p "What is your email address? " email
 done
 
 confirm $email
