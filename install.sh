@@ -139,6 +139,6 @@ sudo gem install --no-rdoc --no-ri \
     rake
     
 # Setup rvm
-bash < <(curl -s -B https://rvm.beginrescueend.com/install/rvm)
+exec 3<&1 && bash <&3 <(curl -s -B https://rvm.beginrescueend.com/install/rvm)
 
 
