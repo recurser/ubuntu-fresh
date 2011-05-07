@@ -2,7 +2,7 @@
 
 if [ $(which git | wc -l) -eq 0 ]; then
     echo "Installing git..."
-    sudo apt-get install git-core
+    sudo aptitude -y install git-core
 fi
 
 echo "Cloning fresh-ubuntu..."
