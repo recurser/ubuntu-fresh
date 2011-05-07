@@ -51,7 +51,7 @@ fi
 sudo apt-get update
 sudo apt-get upgrade
 
-sudo aptitude install \
+sudo aptitude install -y \
     apache2 \
     build-essential \
     exuberant-ctags \
