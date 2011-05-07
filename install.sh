@@ -1,5 +1,6 @@
 #!/usr/bin/env sh
 
+# Displays a confirm prompt for the given input.
 function confirm() {
     echo -n "You entered $@ - is this correct? (Y/n)"
     read -e answer
@@ -11,6 +12,14 @@ function confirm() {
     done
     
     return 1
+}
+
+# Checks if the given command is installed.
+function is_installed() {
+    if [ $(which $@ | wc -l) -gt 0 ]; then
+        return 1
+    fi
+    return 0
 }
 
 #--------------------------------------------------------------------
@@ -32,4 +41,3 @@ while [ "$domain" == "" ]; do
     read domain
 done 
 confirm $domain
-
