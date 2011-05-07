@@ -69,8 +69,59 @@ fi
 #--------------------------------------------------------------------
 if [ `grep $user /etc/passwd | wc -l` -eq 0 ]; then
     echo "Adding user '$user'"
-    #adduser $user
+    sudo adduser $user
 fi;
+
+
+#--------------------------------------------------------------------
+#
+# I N S T A L L   B A S E   P A C K A G E S
+#
+#--------------------------------------------------------------------
+sudo apt-get update
+sudo apt-get upgrade
+
+sudo aptitude install \
+    ant \
+    apache2 \
+    autoconf \
+    build-essential \
+    fail2ban \
+    fakeroot \
+    gcc \
+    locales \
+    language-pack-en \
+    language-pack-ja \
+    libapache2-mod-php5 \
+    libapache2-mod-suphp \
+    locate \
+    memcached \
+    mercurial \
+    mysql-client\
+    mysql-common \
+    mysql-server \
+    nginx \
+    openssh-blacklist \
+    openssl-blacklist \
+    php5 \
+    php5-common \
+    php5-curl \
+    php5-dev \
+    php5-gd \
+    php5-imagick \
+    php5-mcrypt \
+    php5-memcache \
+    php5-mysql \
+    screen \
+    subversion \
+    telnet \
+    vim-full \
+    wget \
+    zsh
+    
+# Initialize the 'locate' database.
+updatedb
+
 
 
 
