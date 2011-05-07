@@ -128,6 +128,15 @@ fi;
 
 #--------------------------------------------------------------------
 #
+# H O S T N A M E
+#
+#--------------------------------------------------------------------
+sudo /bin/hostname $domain
+sudo sed -ri "s|^127\.0\.0\.1 localhost.*$|127.0.0.1 localhost $domain|"
+
+
+#--------------------------------------------------------------------
+#
 # I P T A B L E S   R U L E S
 #
 #--------------------------------------------------------------------
@@ -197,4 +206,34 @@ if ! id $user > /dev/null 2>&1; then
 fi
 
 
+#--------------------------------------------------------------------
+#
+# N G I N X
+#
+#--------------------------------------------------------------------
+if [ ! -f /etc/nginx/sites-available/001-${domain} ]; then
+    sudo cp conf/nginx-domain.conf /etc/nginx/sites-available/001-${domain}
+    sudo ln -s /etc/nginx/sites-available/001-${domain} /etc/nginx/sites-enabled/001-${domain}
+    sudo sed -ri "s|__DOMAIN__|001-${domain}|g" /etc/nginx/sites-available/001-${domain}
+    sudo /etc/init.d/nginx restart
+fi
 
+
+#--------------------------------------------------------------------
+#
+# A P A C H E
+#
+#--------------------------------------------------------------------
+if [ ! -f /etc/apache2/sites-available/001-${domain} ]; then
+    su root -c "echo "Listen 8080" > /etc/apache2/ports.conf"
+    sudo cp conf/apache-default.conf /etc/apache2/sites-available/000-default
+    sudo cp conf/apache-domain.conf /etc/apache2/sites-available/001-${domain}
+    sudo ln -s /etc/apache2/sites-available/001-${domain} /etc/apache2/sites-enabled/001-${domain}
+    sudo sed -ri "s|__DOMAIN__|001-${domain}|g" /etc/apache2/sites-available/001-${domain}
+    
+    sudo mkdir -p /var/www/${domain}/
+    sudo cp conf/index.html /var/www/${domain}/
+    sudo sed -ri "s|__DOMAIN__|001-${domain}|g" /var/www/${domain}/index.html
+    
+    sudo /etc/init.d/apache2 restart
+fi
