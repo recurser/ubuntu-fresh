@@ -9,7 +9,6 @@
 
 # Read in the user name.
 while [ -z "$user" ]; do
-    echo "Getting user..."
     read -p "What username would you like to use? " user
 done
 
@@ -102,6 +101,32 @@ sudo updatedb
 
 #--------------------------------------------------------------------
 #
+# S S H   C O N F I G
+#
+#--------------------------------------------------------------------
+sudo sed -ri "s|PermitRootLogin yes|PermitRootLogin no|" /etc/ssh/sshd_config
+sudo sed -ri "s|X11Forwarding yes|X11Forwarding no|" /etc/ssh/sshd_config
+sudo sed -ri "s|UseDNS yes|UseDNS no|" /etc/ssh/sshd_config
+sudo sed -ri "s|UsePAM yes|UsePAM no|" /etc/ssh/sshd_config
+if [ `grep PermitRootLogin /etc/ssh/sshd_config | wc -l` -eq 0 ]; then
+    su root -c "echo -n \"PermitRootLogin no\n\" >> /etc/ssh/sshd_config"
+fi; 
+if [ `grep X11Forwarding /etc/ssh/sshd_config | wc -l` -eq 0 ]; then
+    su root -c "echo -n \"X11Forwarding no\n\" >> /etc/ssh/sshd_config"
+fi; 
+if [ `grep UsePAM /etc/ssh/sshd_config | wc -l` -eq 0 ]; then
+    su root -c "echo -n \"UsePam no\n\" >> /etc/ssh/sshd_config"
+fi; 
+if [ `grep UseDNS /etc/ssh/sshd_config | wc -l` -eq 0 ]; then
+        su root -c "echo -n \"UseDNS no\n\" >> /etc/ssh/sshd_config"
+fi;
+if [ `grep AllowUsers /etc/ssh/sshd_config | wc -l` -eq 0 ]; then
+        su root -c "echo -n \"AllowUsers ${user}\n\" >> /etc/ssh/sshd_config"
+fi;
+
+
+#--------------------------------------------------------------------
+#
 # I N S T A L L   G E M S
 #
 #--------------------------------------------------------------------
@@ -136,6 +161,11 @@ if [ `grep $user /etc/passwd | wc -l` -eq 0 ]; then
     mkdir -p /users/$user
     chown $user:$user /users/$user
     
+    # Add this user to sudoers.
+    if [ `grep "$user    ALL=(ALL) ALL" /etc/sudoers | wc -l` -eq 0 ]; then
+        sudo sed -r "s|^(root[\t\s]+ALL=.*)$|\1\n${user}\tALL=(ALL) ALL|g" /etc/sudoers
+    fi
+    
     # Set up zsh and vim config etc.
     chsh -s /usr/bin/zsh $user
     cd /tmp
@@ -149,5 +179,6 @@ fi;
 if ! id $user > /dev/null 2>&1; then
     chsh user /usr/bin/zsh
 fi
+
 
 
