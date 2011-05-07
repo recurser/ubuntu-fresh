@@ -3,7 +3,7 @@
 # Displays a confirm prompt for the given input.
 confirm() {
     echo -n "You entered $@ - is this correct? (Y/n)"
-    read -e answer
+    read answer
     for response in n N no No NO; do
         if [ "_$answer" == "_$response" ]; then
             echo "Cancelling..."
