@@ -11,4 +11,4 @@ git clone --recursive git://github.com/recurser/fresh-ubuntu.git
 cd fresh-ubuntu
 
 echo "Installing..."
-sh ./install.sh
+./install.sh
