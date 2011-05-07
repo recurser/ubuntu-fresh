@@ -30,34 +30,34 @@ is_installed() {
 #--------------------------------------------------------------------
 
 # Read in the user name.
-while [ "_$user" == "_" ]
-do
+while [ "_$user" == "_" ]; do
     echo -n "What username would you like to use? "
-    read $user
-done 
+    read user
+done
+
 confirm $user
 
 # Read in the domain name.
-while [ "_$domain" == "_" ]
-do
+while [ "_$domain" == "_" ]; do
     echo -n "What domain would you like to access your server with? "
-    read $domain
-done 
+    read domain
+done
+
 confirm $domain
 # Read in the full name.
-while [ "$full_name" == "" ]
-do
+while [ "$full_name" == "" ]; do
     echo -n "What is your full name? "
-    read $full_name
-done 
+    read full_name
+done
+
 confirm $full_name
 
 # Read in the full email address.
-while [ "$email" == "" ]
-do
+while [ "$email" == "" ]; do
     echo -n "What is your email address? "
-    read $email
-done 
+    read email
+done
+
 confirm $email
 
 
@@ -82,7 +82,7 @@ fi
 #--------------------------------------------------------------------
 if [ `grep $user /etc/passwd | wc -l` -eq 0 ]; then
     echo "Adding user '$user'"
-    adduser $user
+    #adduser $user
 fi;
 
 
