@@ -223,6 +223,7 @@ if [ ! -f /etc/apache2/sites-available/${domain} ]; then
     sudo cp ${CURR_DIR}/conf/apache-domain.conf /etc/apache2/sites-available/${domain}
     sudo ln -s /etc/apache2/sites-available/${domain} /etc/apache2/sites-enabled/001-${domain}
     sudo sed -ri "s|__DOMAIN__|${domain}|g" /etc/apache2/sites-available/${domain}
+    sudo sed -ri "s|__DOMAIN__|${domain}|g" /etc/apache2/sites-available/default
     
     sudo mkdir -p /var/www/${domain}/
     sudo cp ${CURR_DIR}/conf/index.html /var/www/${domain}/
@@ -243,8 +244,8 @@ if [ ! -f /etc/nginx/sites-available/${domain} ]; then
     sudo sed -ri "s|__DOMAIN__|001-${domain}|g" /etc/nginx/sites-available/${domain}
     
     # Unlike apache, default config doesn't ship with a numeric prefix for some reason.
-    if [ -f /etc/nginx/sites-available/default ]; then
-        sudo mv /etc/nginx/sites-available/default /etc/nginx/sites-available/000-default
+    if [ -f /etc/nginx/sites-enabled/default ]; then
+        sudo mv /etc/nginx/sites-enabled/default /etc/nginx/sites-enabled/000-default
     fi
     
     sudo /etc/init.d/nginx restart
