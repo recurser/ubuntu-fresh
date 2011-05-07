@@ -113,16 +113,16 @@ if [ `grep PermitRootLogin /etc/ssh/sshd_config | wc -l` -eq 0 ]; then
     echo skipping...
 fi
 if [ `grep X11Forwarding /etc/ssh/sshd_config | wc -l` -eq 0 ]; then
-    su root -c "echo -n \"X11Forwarding no\n\" >> /etc/ssh/sshd_config"
+    su root -c "echo \"X11Forwarding no\" >> /etc/ssh/sshd_config"
 fi
 if [ `grep UsePAM /etc/ssh/sshd_config | wc -l` -eq 0 ]; then
-    su root -c "echo -n \"UsePam no\n\" >> /etc/ssh/sshd_config"
+    su root -c "echo \"UsePam no\" >> /etc/ssh/sshd_config"
 fi
 if [ `grep UseDNS /etc/ssh/sshd_config | wc -l` -eq 0 ]; then
-        su root -c "echo -n \"UseDNS no\n\" >> /etc/ssh/sshd_config"
+        su root -c "echo \"UseDNS no\" >> /etc/ssh/sshd_config"
 fi;
 if [ `grep AllowUsers /etc/ssh/sshd_config | wc -l` -eq 0 ]; then
-        su root -c "echo -n \"AllowUsers ${user}\n\" >> /etc/ssh/sshd_config"
+        su root -c "echo \"AllowUsers ${user}\" >> /etc/ssh/sshd_config"
 fi;
 
 
