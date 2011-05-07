@@ -101,6 +101,7 @@ sudo aptitude install \
     php5-mcrypt \
     php5-memcache \
     php5-mysql \
+    ruby \
     screen \
     subversion \
     telnet \
@@ -109,12 +110,11 @@ sudo aptitude install \
     vim-python \
     vim-rails \
     vim-ruby \
-    vim-scripts \
     wget \
     zsh
     
 # Initialize the 'locate' database.
-updatedb
+sudo updatedb
 
 
 #--------------------------------------------------------------------
@@ -134,5 +134,27 @@ if ! id $user > /dev/null 2>&1; then
     chsh user /usr/bin/zsh
 fi
 
+
+#--------------------------------------------------------------------
+#
+# I N S T A L L   G E M S
+#
+#--------------------------------------------------------------------
+if [ $(which gem | wc -l) -eq 0 ]; then
+    cd /tmp
+    wget http://production.cf.rubygems.org/rubygems/rubygems-1.7.2.tgz
+    tar xvzf rubygems-1.7.2.tgz
+    cd rubygems-1.7.2
+    sudo ruby setup.rb
+    sudo ln -s /usr/bin/gem1.8 /usr/bin/gem
+fi
+
+sudo gem install --no-rdoc --no-ri \
+    bundler \
+    capistrano \
+    git-up \
+    rvm \
+    rake
+    
 
 
