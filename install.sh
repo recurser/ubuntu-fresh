@@ -212,7 +212,7 @@ fi
 #
 #--------------------------------------------------------------------
 if [ ! -f /etc/apache2/sites-available/${domain} ]; then
-    su root -c "echo "Listen 8080" > /etc/apache2/ports.conf"
+    su root -c "echo \"Listen 8080\" > /etc/apache2/ports.conf"
     sudo cp conf/apache-default.conf /etc/apache2/sites-available/default
     sudo cp conf/apache-domain.conf /etc/apache2/sites-available/${domain}
     sudo ln -s /etc/apache2/sites-available/${domain} /etc/apache2/sites-enabled/001-${domain}
