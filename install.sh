@@ -241,7 +241,7 @@ fi
 if [ ! -f /etc/nginx/sites-available/${domain} ]; then
     sudo cp ${CURR_DIR}/conf/nginx-domain.conf /etc/nginx/sites-available/${domain}
     sudo ln -s /etc/nginx/sites-available/${domain} /etc/nginx/sites-enabled/001-${domain}
-    sudo sed -ri "s|__DOMAIN__|001-${domain}|g" /etc/nginx/sites-available/${domain}
+    sudo sed -ri "s|__DOMAIN__|${domain}|g" /etc/nginx/sites-available/${domain}
     
     # Unlike apache, default config doesn't ship with a numeric prefix for some reason.
     if [ -f /etc/nginx/sites-enabled/default ]; then
