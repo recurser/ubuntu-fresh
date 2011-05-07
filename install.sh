@@ -64,17 +64,6 @@ fi
 
 #--------------------------------------------------------------------
 #
-# S E T   U P   U S E R   A C C O U N T
-#
-#--------------------------------------------------------------------
-if [ `grep $user /etc/passwd | wc -l` -eq 0 ]; then
-    echo "\n\n Adding a new user '$user' - please enter a password at the prompt."
-    sudo adduser $user
-fi;
-
-
-#--------------------------------------------------------------------
-#
 # I N S T A L L   B A S E   P A C K A G E S
 #
 #--------------------------------------------------------------------
@@ -122,6 +111,21 @@ sudo aptitude install \
 # Initialize the 'locate' database.
 updatedb
 
+
+#--------------------------------------------------------------------
+#
+# S E T   U P   U S E R   A C C O U N T
+#
+#--------------------------------------------------------------------
+if [ `grep $user /etc/passwd | wc -l` -eq 0 ]; then
+    echo "\n\n Adding a new user '$user' - please enter a password at the prompt."
+    sudo adduser $user
+fi;
+
+# Make zsh the default shell.
+if ! id $user > /dev/null 2>&1; then
+    chsh user /usr/bin/zsh
+fi
 
 
 
