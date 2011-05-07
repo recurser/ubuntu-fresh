@@ -30,14 +30,14 @@ function is_installed() {
 #--------------------------------------------------------------------
 
 # Read in the user name.
-while [ "$user" == "" ]; do
+while [ "_$user" == "_" ]; do
     echo -n "What username would you like to use? "
     read user
 done 
 confirm $user
 
 # Read in the domain name.
-while [ "$domain" == "" ]; do
+while [ "_$domain" == "_" ]; do
     echo -n "What domain would you like to access your server with? "
     read domain
 done 
