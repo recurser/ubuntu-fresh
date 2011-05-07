@@ -28,6 +28,7 @@ is_installed() {
 
 # Read in the user name.
 while [ -z "$user" ]; do
+    echo "Getting user..."
     read -p "What username would you like to use? " user
 done
 
