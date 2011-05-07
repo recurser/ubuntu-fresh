@@ -6,6 +6,7 @@ if [ $(which git | wc -l) -eq 0 ]; then
 fi
 
 echo "Cloning fresh-ubuntu..."
+cd /tmp
 rm -Rf fresh-ubuntu
 git clone --recursive git://github.com/recurser/fresh-ubuntu.git
 cd fresh-ubuntu
