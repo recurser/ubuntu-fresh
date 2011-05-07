@@ -127,6 +127,21 @@ fi;
 
 #--------------------------------------------------------------------
 #
+# I P T A B L E S
+#
+#--------------------------------------------------------------------
+if [! -f /etc/iptables.up.rules ]; then
+    sudo iptables-restore < conf/iptables.up.rules
+    sudo cp conf/iptables.up.rules /etc/iptables.up.rules 
+    if [ `grep iptables-restore /etc/network/interfaces | wc -l` -eq 0 ]; then
+        sudo sed -ri "s|iface lo inet loopback|iface lo inet loopback\npre-up iptables-restore < /etc/iptables.up.rules|" /etc/network/interfaces
+        sudo /etc/init.d/ssh reload
+    fi;
+fi
+
+
+#--------------------------------------------------------------------
+#
 # I N S T A L L   G E M S
 #
 #--------------------------------------------------------------------
