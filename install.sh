@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 # Displays a confirm prompt for the given input.
 function confirm() {
