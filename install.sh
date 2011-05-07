@@ -119,7 +119,8 @@ updatedb
 #--------------------------------------------------------------------
 if [ `grep $user /etc/passwd | wc -l` -eq 0 ]; then
     echo "\n\n Adding a new user '$user' - please enter a password at the prompt."
-    sudo adduser $user
+    mkdir /users/$user
+    sudo adduser -d /users/$user $user
 fi;
 
 # Make zsh the default shell.
