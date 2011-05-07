@@ -5,12 +5,8 @@ if [ $(which git | wc -l) -eq 0 ]; then
     sudo aptitude -y install git-core
 fi
 
-if [ -d fresh-ubuntu]; then
-    echo "Removing old fresh-ubuntu folder..."
-    rm -Rf fresh-ubuntu
-fi
-
 echo "Cloning fresh-ubuntu..."
+rm -Rf fresh-ubuntu
 git clone --recursive git://github.com/recurser/fresh-ubuntu.git
 cd fresh-ubuntu
 
