@@ -208,32 +208,32 @@ fi
 
 #--------------------------------------------------------------------
 #
-# N G I N X
-#
-#--------------------------------------------------------------------
-if [ ! -f /etc/nginx/sites-available/001-${domain} ]; then
-    sudo cp conf/nginx-domain.conf /etc/nginx/sites-available/001-${domain}
-    sudo ln -s /etc/nginx/sites-available/001-${domain} /etc/nginx/sites-enabled/001-${domain}
-    sudo sed -ri "s|__DOMAIN__|001-${domain}|g" /etc/nginx/sites-available/001-${domain}
-    sudo /etc/init.d/nginx restart
-fi
-
-
-#--------------------------------------------------------------------
-#
 # A P A C H E
 #
 #--------------------------------------------------------------------
-if [ ! -f /etc/apache2/sites-available/001-${domain} ]; then
+if [ ! -f /etc/apache2/sites-available/${domain} ]; then
     su root -c "echo "Listen 8080" > /etc/apache2/ports.conf"
     sudo cp conf/apache-default.conf /etc/apache2/sites-available/000-default
-    sudo cp conf/apache-domain.conf /etc/apache2/sites-available/001-${domain}
-    sudo ln -s /etc/apache2/sites-available/001-${domain} /etc/apache2/sites-enabled/001-${domain}
-    sudo sed -ri "s|__DOMAIN__|001-${domain}|g" /etc/apache2/sites-available/001-${domain}
+    sudo cp conf/apache-domain.conf /etc/apache2/sites-available/${domain}
+    sudo ln -s /etc/apache2/sites-available/${domain} /etc/apache2/sites-enabled/001-${domain}
+    sudo sed -ri "s|__DOMAIN__|001-${domain}|g" /etc/apache2/sites-available/${domain}
     
     sudo mkdir -p /var/www/${domain}/
     sudo cp conf/index.html /var/www/${domain}/
     sudo sed -ri "s|__DOMAIN__|001-${domain}|g" /var/www/${domain}/index.html
     
     sudo /etc/init.d/apache2 restart
+fi
+
+
+#--------------------------------------------------------------------
+#
+# N G I N X
+#
+#--------------------------------------------------------------------
+if [ ! -f /etc/nginx/sites-available/${domain} ]; then
+    sudo cp conf/nginx-domain.conf /etc/nginx/sites-available/${domain}
+    sudo ln -s /etc/nginx/sites-available/${domain} /etc/nginx/sites-enabled/001-${domain}
+    sudo sed -ri "s|__DOMAIN__|001-${domain}|g" /etc/nginx/sites-available/${domain}
+    sudo /etc/init.d/nginx restart
 fi
