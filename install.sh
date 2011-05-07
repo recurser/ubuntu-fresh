@@ -104,12 +104,12 @@ sudo updatedb
 # S S H   C O N F I G
 #
 #--------------------------------------------------------------------
-sudo sed -ri "s|PermitRootLogin yes|PermitRootLogin no|" /etc/ssh/sshd_config
+#sudo sed -ri "s|PermitRootLogin yes|PermitRootLogin no|" /etc/ssh/sshd_config
 sudo sed -ri "s|X11Forwarding yes|X11Forwarding no|" /etc/ssh/sshd_config
 sudo sed -ri "s|UseDNS yes|UseDNS no|" /etc/ssh/sshd_config
 sudo sed -ri "s|UsePAM yes|UsePAM no|" /etc/ssh/sshd_config
 if [ `grep PermitRootLogin /etc/ssh/sshd_config | wc -l` -eq 0 ]; then
-    su root -c "echo -n \"PermitRootLogin no\n\" >> /etc/ssh/sshd_config"
+    #su root -c "echo -n \"PermitRootLogin no\n\" >> /etc/ssh/sshd_config"
 fi; 
 if [ `grep X11Forwarding /etc/ssh/sshd_config | wc -l` -eq 0 ]; then
     su root -c "echo -n \"X11Forwarding no\n\" >> /etc/ssh/sshd_config"
