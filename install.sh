@@ -1,11 +1,6 @@
 #!/usr/bin/env sh
 
 
-# Setup rvm
-su root -c "bash < <(curl -s -B https://rvm.beginrescueend.com/install/rvm)"
-
-exit
-
 #--------------------------------------------------------------------
 #
 # R E A D   I N   I N I T I A L   U S E R   D A T A
