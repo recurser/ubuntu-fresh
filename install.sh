@@ -1,24 +1,5 @@
 #!/usr/bin/env sh
 
-# Displays a confirm prompt for the given input.
-confirm() {
-    read -p "You entered $@ - is this correct? (y/N) " answer
-        if [ "$answer" == "y" ]; then
-            return 1
-        fi
-    
-    echo "Cancelling..."
-    exit 1
-}
-
-# Checks if the given command is installed.
-is_installed() {
-    if [ `which $@ | wc -l` -gt 0 ]; then
-        return 1
-    fi
-    return 0
-}
-
 
 #--------------------------------------------------------------------
 #
@@ -102,6 +83,7 @@ sudo aptitude install \
     php5-memcache \
     php5-mysql \
     ruby \
+    ruby-dev \
     screen \
     subversion \
     telnet \
@@ -140,7 +122,7 @@ fi
 # I N S T A L L   G E M S
 #
 #--------------------------------------------------------------------
-if [ $(which gem | wc -l) -eq 0 ]; then
+if [ $(which gem | wc -l) -eq 0 -o `gem --version` != "1.7.2" ]; then
     cd /tmp
     wget http://production.cf.rubygems.org/rubygems/rubygems-1.7.2.tgz
     tar xvzf rubygems-1.7.2.tgz
@@ -156,5 +138,7 @@ sudo gem install --no-rdoc --no-ri \
     rvm \
     rake
     
+# Setup rvm
+bash < <(curl -s -B https://rvm.beginrescueend.com/install/rvm)
 
 
