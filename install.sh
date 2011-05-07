@@ -68,7 +68,7 @@ fi
 #
 #--------------------------------------------------------------------
 if [ `grep $user /etc/passwd | wc -l` -eq 0 ]; then
-    echo "Adding user '$user'"
+    echo "\n\n Adding a new user '$user' - please enter a password at the prompt."
     sudo adduser $user
 fi;
 
