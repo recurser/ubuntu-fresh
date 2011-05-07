@@ -33,28 +33,28 @@ while [ -z "$user" ]; do
     read -p "What username would you like to use? " user
 done
 
-confirm $user
+confirm user
 
 # Read in the domain name.
 while [ -z "$domain" ]; do
     read -p "What domain would you like to access your server with? " domain
 done
 
-confirm $domain
+confirm domain
 
 # Read in the full name.
 while [ -z "$full_name" ]; do
     read -p "What is your full name? " full_name
 done
 
-confirm $full_name
+confirm full_name
 
 # Read in the full email address.
 while [ -z "$email" ]; do
     read -p "What is your email address? " email
 done
 
-confirm $email
+confirm email
 
 
 #--------------------------------------------------------------------
