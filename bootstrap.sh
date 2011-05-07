@@ -11,4 +11,4 @@ echo "Cloning fresh-ubuntu..."
 cd fresh-ubuntu
 
 echo "Installing..."
-./install.sh
+sh ./install.sh
