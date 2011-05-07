@@ -16,7 +16,7 @@ confirm() {
 
 # Checks if the given command is installed.
 is_installed() {
-    if [ $(which $@ | wc -l) -gt 0 ]; then
+    if [ `which $@ | wc -l` -gt 0 ]; then
         return 1
     fi
     return 0
@@ -30,27 +30,31 @@ is_installed() {
 #--------------------------------------------------------------------
 
 # Read in the user name.
-while [ "_$user" == "_" ]; do
+while [ "_$user" == "_" ]
+do
     echo -n "What username would you like to use? "
     read $user
 done 
 confirm $user
 
 # Read in the domain name.
-while [ "_$domain" == "_" ]; do
+while [ "_$domain" == "_" ]
+do
     echo -n "What domain would you like to access your server with? "
     read $domain
 done 
 confirm $domain
 # Read in the full name.
-while [ "$full_name" == "" ]; do
+while [ "$full_name" == "" ]
+do
     echo -n "What is your full name? "
     read $full_name
 done 
 confirm $full_name
 
 # Read in the full email address.
-while [ "$email" == "" ]; do
+while [ "$email" == "" ]
+do
     echo -n "What is your email address? "
     read $email
 done 
@@ -62,11 +66,11 @@ confirm $email
 # S E T   U P   G I T   N A M E   A N D   E M A I L
 #
 #--------------------------------------------------------------------
-if [ $(git config --global --get user.name | wc -l) -eq 0 ]; then
+if [ `git config --global --get user.name | wc -l` -eq 0 ]; then
      git config --global user.name $full_name
 fi
 
-if [ $(git config --global --get user.email | wc -l) -eq 0 ]; then
+if [ `git config --global --get user.email | wc -l` -eq 0 ]; then
      git config --global user.name $email
 fi
 
@@ -76,7 +80,7 @@ fi
 # S E T   U P   U S E R   A C C O U N T
 #
 #--------------------------------------------------------------------
-if [ $(grep $user /etc/passwd | wc -l) -eq 0 ]; then
+if [ `grep $user /etc/passwd | wc -l` -eq 0 ]; then
     echo "Adding user '$user'"
     adduser $user
 fi;
