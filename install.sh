@@ -85,6 +85,7 @@ sudo aptitude install \
     ruby-dev \
     rvm \
     screen \
+    ssl-cert \
     subversion \
     telnet \
     vim \
@@ -247,6 +248,14 @@ if [ ! -f /etc/nginx/sites-available/${domain} ]; then
     if [ -f /etc/nginx/sites-enabled/default ]; then
         sudo mv /etc/nginx/sites-enabled/default /etc/nginx/sites-enabled/000-default
     fi
+    
+    # Make SSL certificate.
+    sudo mkdir -p /etc/nginx/certificates/signed
+    sudo mkdir -p /etc/nginx/certificates/private
+    openssl req -x509 -newkey rsa:2048 -out ${domain}.pem -outform PEM -days 1825
+    sudo mv ${domain}.pem /etc/nginx/certificates/signed
+    sudo mv privkey.pem /etc/nginx/certificates/private/${domain}.key
+    openssl x509 -in /etc/nginx/certificates/signed/${domain}.pem -out /etc/nginx/certificates/signed/${domain}.crt
     
     sudo /etc/init.d/nginx restart
 fi
