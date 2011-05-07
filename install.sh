@@ -1,6 +1,25 @@
 #!/usr/bin/env sh
 
 
+
+
+#--------------------------------------------------------------------
+#
+# I P T A B L E S   R U L E S
+#
+#--------------------------------------------------------------------
+if [! -f /etc/iptables.up.rules ]; then
+    sudo iptables-restore < conf/iptables.up.rules
+    sudo cp conf/iptables.up.rules /etc/iptables.up.rules 
+    if [ `grep iptables-restore /etc/network/interfaces | wc -l` -eq 0 ]; then
+        sudo sed -ri "s|iface lo inet loopback|iface lo inet loopback\npre-up iptables-restore < /etc/iptables.up.rules|" /etc/network/interfaces
+        sudo /etc/init.d/ssh reload
+    fi
+fi
+
+
+exit
+
 #--------------------------------------------------------------------
 #
 # R E A D   I N   I N I T I A L   U S E R   D A T A
