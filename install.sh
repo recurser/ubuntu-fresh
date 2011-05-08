@@ -11,7 +11,7 @@ CURR_DIR=$(cd `dirname $0` && pwd)
 
 # Read in the user name.
 while [ -z "$NEW_USER" ]; do
-    read -p "What username would you like to use? " user
+    read -p "What username would you like to use? " NEW_USER
 done
 
 # Read in the domain name.
