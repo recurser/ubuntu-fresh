@@ -178,6 +178,7 @@ sudo gem install --no-rdoc --no-ri \
     bundler \
     capistrano \
     git-up \
+    rdoc \
     rvm \
     rake
     
