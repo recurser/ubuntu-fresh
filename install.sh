@@ -159,9 +159,10 @@ fi
 #
 #--------------------------------------------------------------------
 install_rubygems=0
-if [ $(which gem | wc -l) -eq 0 ]: thn
+if [ $(which gem | wc -l) -eq 0 ]: then
     install_rubygems=1
-elsif [ `gem --version` != "1.7.2" ]; then
+fi
+if [ `gem --version` != "1.7.2" ]; then
     install_rubygems=1
 fi
 
