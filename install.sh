@@ -9,6 +9,20 @@ CURR_DIR=$(cd `dirname $0` && pwd)
 #
 #--------------------------------------------------------------------
 
+
+echo
+echo
+echo "#############################################################"
+echo "#                                                           #"
+echo "#        C O L L E C T I N G   I N F O R M A T I O N        #"
+echo "#                                                           #"
+echo "#  We need to collect some information about you before we  #"
+echo "#  begin. This will be used to set up a default user,       #"
+echo "#  hostname, and set your user's details in git.            #"
+echo "#                                                           #"
+echo "#############################################################"
+echo
+
 # Read in the user name.
 while [ -z "$NEW_USER" ]; do
     read -p "What username would you like to use? " NEW_USER
@@ -265,6 +279,21 @@ fi
 # S U B V E R S I O N
 #
 #--------------------------------------------------------------------
+
+
+echo
+echo
+echo "#############################################################"
+echo "#                                                           #"
+echo "#            S U B V E R S I O N   H O S T I N G            #"
+echo "#                                                           #"
+echo "#  We need to collect some information about you before we  #"
+echo "#  begin. This will be used to set up a default user,       #"
+echo "#  hostname, and set your user's details in git             #"
+echo "#                                                           #"
+echo "###############################################################"
+echo
+
 ADD_SVN=0
 read -p "Would you like this server to host subversion repositories (http://${DOMAIN}/svn/)? [y/N] " SVN_CHOICE
 if [ $SVN_CHOICE == 'Y' -o $SVN_CHOICE == 'y' ]; then
