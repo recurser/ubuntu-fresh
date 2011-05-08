@@ -273,8 +273,11 @@ if [ $ADD_SVN -eq 1 ]; then
     sudo sed -ri "s|__DOMAIN__|${DOMAIN}|g" /etc/apache2/sites-available/${DOMAIN}
     # Access policy.
     sudo cp ${CURR_DIR}/conf/access.policy /opt/subversion/access.policy
-    # Create empty passwords file.
+    sudo sed -ri "s|__USER__|${NEW_USER}|g" /opt/subversion/access.policy
+    # Create passwords file if necessary.
     sudo touch /opt/subversion/passwords
+    echo "Please enter a password for the subversion user (${NEW_USER}):"
+    sudo htpasswd /opt/subversion/passwords ${NEW_USER}
     # Make a new empty repository to hold the repos-style stuff.
     REPO_NAME=repos-web
     sudo rm -Rf /opt/subversion/repositories/${REPO_NAME}
@@ -293,10 +296,11 @@ if [ $ADD_SVN -eq 1 ]; then
     sudo tar xzf repos-web.tar.gz
     cd repos-web
     sudo svn stat | grep '?       ' | awk '{ print $2 }' | xargs svn add
-    sudo find . -name "*.xsl" -exec svn propset svn:mime-type text/xsl {} \;
     sudo sed -ri 's|<xsl:param name="static">/repos-web/</xsl:param>|<xsl:param name="static">/svn/repos-web/</xsl:param>|' view/repos.xsl
     sudo sed -ri 's|<xsl:param name="startpage">/</xsl:param>|<xsl:param name="startpage">/svn/</xsl:param>|' view/repos.xsl
     sudo svn commit -m "Initial commit."
+    sudo find . -name "*.xsl" -exec svn propset svn:mime-type text/xsl {} \;
+    sudo svn commit -m "Fixed some mime-type issues for XSL."
     cd ../
     sudo rm -Rf repos-web.tar.gz repos-web
     # Fix permissions.
