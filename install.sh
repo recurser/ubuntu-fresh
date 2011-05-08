@@ -3,6 +3,33 @@
 CURR_DIR=$(cd `dirname $0` && pwd)
 
 
+#--------------------------------------------------------------------
+#
+# R E A D   I N   I N I T I A L   U S E R   D A T A
+#
+#--------------------------------------------------------------------
+
+# Read in the user name.
+while [ -z "$NEW_USER" ]; do
+    read -p "What username would you like to use? " user
+done
+
+# Read in the domain name.
+while [ -z "$DOMAIN" ]; do
+    read -p "What domain would you like to access your server with? " DOMAIN
+done
+
+# Read in the full name.
+while [ -z "$FULL_NAME" ]; do
+    read -p "What is your full name? " FULL_NAME
+done
+
+# Read in the full email address.
+while [ -z "$EMAIL" ]; do
+    read -p "What is your email address? " EMAIL
+done
+
+
 
 #--------------------------------------------------------------------
 #
@@ -31,32 +58,6 @@ if [ ! -f /etc/nginx/sites-available/svn.${DOMAIN} ]; then
 fi
 
 exit
-
-#--------------------------------------------------------------------
-#
-# R E A D   I N   I N I T I A L   U S E R   D A T A
-#
-#--------------------------------------------------------------------
-
-# Read in the user name.
-while [ -z "$NEW_USER" ]; do
-    read -p "What username would you like to use? " user
-done
-
-# Read in the domain name.
-while [ -z "$DOMAIN" ]; do
-    read -p "What domain would you like to access your server with? " DOMAIN
-done
-
-# Read in the full name.
-while [ -z "$FULL_NAME" ]; do
-    read -p "What is your full name? " FULL_NAME
-done
-
-# Read in the full email address.
-while [ -z "$EMAIL" ]; do
-    read -p "What is your email address? " EMAIL
-done
 
 
 #--------------------------------------------------------------------
