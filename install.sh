@@ -1,5 +1,18 @@
 #!/usr/bin/env bash
 
+# Function for confirming choices with the user.
+function confirm() {
+    read -p "$@ [Y/n]" answer
+    for response in n N no No NO; do
+        if [ "_$answer" == "_$response" ]; then
+            return 0
+        fi
+    done
+    
+    return 1
+}
+
+# Get the current directory.
 CURR_DIR=$(cd `dirname $0` && pwd)
 
 
@@ -261,6 +274,20 @@ if [ ! -f /etc/nginx/sites-available/${DOMAIN} ]; then
     fi
     
     # Make SSL certificate.
+    echo
+    echo
+    echo "#############################################################"
+    echo "#                                                           #"
+    echo "#               S S L   C E R T I F I C A T E               #"
+    echo "#                                                           #"
+    echo "#  Next we're going to create an SSL certificate for your   #"
+    echo "#  site, so you can accept secure HTTPS connections. You'll #"
+    echo "#  need to enter a passphrase for you private key below -   #"
+    echo "#  you may need it in the future so don't forget it!        #"
+    echo "#                                                           #"
+    echo "#############################################################"
+    echo
+    
     sudo mkdir -p /etc/nginx/certificates/signed
     sudo mkdir -p /etc/nginx/certificates/private
     rm -f ${DOMAIN}.csr ${DOMAIN}.key ${DOMAIN}.crt
@@ -295,8 +322,8 @@ echo "###############################################################"
 echo
 
 ADD_SVN=0
-read -p "Would you like this server to host subversion repositories (http://${DOMAIN}/svn/)? [y/N] " SVN_CHOICE
-if [ $SVN_CHOICE == 'Y' -o $SVN_CHOICE == 'y' ]; then
+confirm "Would you like this server to host subversion repositories (http://${DOMAIN}/svn/)?"
+if [ $? -eq 1 ]; then
     ADD_SVN=1
 fi
 if [ $ADD_SVN -eq 1 ]; then
