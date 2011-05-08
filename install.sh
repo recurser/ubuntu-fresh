@@ -48,6 +48,10 @@ if [ ! -f /etc/nginx/sites-available/svn.${DOMAIN} ]; then
         sudo cp ${CURR_DIR}/conf/apache-svn.conf /etc/apache2/sites-available/svn.${DOMAIN}
         sudo ln -s /etc/apache2/sites-available/svn.${DOMAIN} /etc/apache2/sites-enabled/002-svn.${DOMAIN}
         sudo sed -ri "s|__DOMAIN__|${DOMAIN}|g" /etc/apache2/sites-available/svn.${DOMAIN}
+        #nginx config.    
+        sudo cp ${CURR_DIR}/conf/nginx-svn.conf /etc/nginx/sites-available/svn.${DOMAIN}
+        sudo ln -s /etc/nginx/sites-available/svn.${DOMAIN} /etc/nginx/sites-enabled/002-svn.${DOMAIN}
+        sudo sed -ri "s|__DOMAIN__|${DOMAIN}|g" /etc/nginx/sites-available/svn.${DOMAIN}
         # Access policy.
         sudo cp ${CURR_DIR}/conf/access.policy /opt/subversion/access.policy
         # Create empty passwords file.
@@ -256,9 +260,11 @@ fi
 #
 #--------------------------------------------------------------------
 if [ ! -f /etc/nginx/sites-available/${DOMAIN} ]; then
+    sudo cp ${CURR_DIR}/conf/nginx-default.conf /etc/nginx/sites-available/default
     sudo cp ${CURR_DIR}/conf/nginx-domain.conf /etc/nginx/sites-available/${DOMAIN}
     sudo ln -s /etc/nginx/sites-available/${DOMAIN} /etc/nginx/sites-enabled/001-${DOMAIN}
     sudo sed -ri "s|__DOMAIN__|${DOMAIN}|g" /etc/nginx/sites-available/${DOMAIN}
+    sudo sed -ri "s|__DOMAIN__|${DOMAIN}|g" /etc/nginx/sites-available/default
     
     # Unlike apache, default config doesn't ship with a numeric prefix for some reason - fix this.
     if [ -f /etc/nginx/sites-enabled/default ]; then
