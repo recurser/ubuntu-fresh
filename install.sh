@@ -247,10 +247,7 @@ if [ ! -f /etc/nginx/sites-available/${DOMAIN} ]; then
     sudo mkdir -p /etc/nginx/certificates/private
     rm -f ${DOMAIN}.csr ${DOMAIN}.key ${DOMAIN}.crt
     openssl genrsa -des3 -out ${DOMAIN}.key 1024
-    openssl req -new -key ${DOMAIN}.key -out ${DOMAIN}.csr
-    mv ${DOMAIN}.key ${DOMAIN}.key.orig
-    openssl rsa -in ${DOMAIN}.key.orig -out ${DOMAIN}.key
-    rm ${DOMAIN}.key.orig
+    openssl req -new -nodes -keyout ${DOMAIN}.key -out ${DOMAIN}.csr
     openssl x509 -req -days 365 -in ${DOMAIN}.csr -signkey ${DOMAIN}.key -out ${DOMAIN}.crt
     sudo mv ${DOMAIN}.crt /etc/nginx/certificates/signed/${DOMAIN}.crt
     sudo mv ${DOMAIN}.key /etc/nginx/certificates/private/${DOMAIN}.key
