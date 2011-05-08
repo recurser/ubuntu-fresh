@@ -282,7 +282,6 @@ if [ $ADD_SVN -eq 1 ]; then
     REPO_NAME=repos-web
     sudo rm -Rf /opt/subversion/repositories/${REPO_NAME}
     sudo svnadmin create --fs-type fsfs /opt/subversion/repositories/${REPO_NAME}
-    sudo chown -R www-data:www-data /opt/subversion/repositories/${REPO_NAME}
     sudo chmod -R g+w /opt/subversion/repositories/${REPO_NAME}
     sudo chmod g+s /opt/subversion/repositories/${REPO_NAME}/db
     # Set up repos-style in a new repository to make things look a bit nicer, and give us an example repository.
@@ -303,6 +302,12 @@ if [ $ADD_SVN -eq 1 ]; then
     sudo svn commit -m "Fixed some mime-type issues for XSL."
     cd ../
     sudo rm -Rf repos-web.tar.gz repos-web
+    # Make a private repository to demonstrate the access control.
+    REPO_NAME=private-repo
+    sudo rm -Rf /opt/subversion/repositories/${REPO_NAME}
+    sudo svnadmin create --fs-type fsfs /opt/subversion/repositories/${REPO_NAME}
+    sudo chmod -R g+w /opt/subversion/repositories/${REPO_NAME}
+    sudo chmod g+s /opt/subversion/repositories/${REPO_NAME}/db
     # Fix permissions.
     sudo chown -R www-data:www-data /opt/subversion
     # Restart apache and nginx.
