@@ -90,6 +90,7 @@ sudo aptitude install -y \
     screen \
     ssl-cert \
     subversion \
+    subversion-tools \
     telnet \
     vim \
     vim-perl \
@@ -233,7 +234,9 @@ if [ ! -f /etc/nginx/sites-available/${DOMAIN} ]; then
     sudo ln -s /etc/nginx/sites-available/${DOMAIN} /etc/nginx/sites-enabled/001-${DOMAIN}
     sudo sed -ri "s|__DOMAIN__|${DOMAIN}|g" /etc/nginx/sites-available/${DOMAIN}
     sudo sed -ri "s|__DOMAIN__|${DOMAIN}|g" /etc/nginx/sites-available/default
-    
+    # Put our default at last instead of first.
+    sudo rm -f /etc/nginx/sites-enabled/000-default
+    sudo ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/999-default
     # Unlike apache, default config doesn't ship with a numeric prefix for some reason - fix this.
     if [ -f /etc/nginx/sites-enabled/default ]; then
         sudo mv /etc/nginx/sites-enabled/default /etc/nginx/sites-enabled/000-default
@@ -248,7 +251,7 @@ if [ ! -f /etc/nginx/sites-available/${DOMAIN} ]; then
     mv ${DOMAIN}.key ${DOMAIN}.key.orig
     openssl rsa -in ${DOMAIN}.key.orig -out ${DOMAIN}.key
     rm ${DOMAIN}.key.orig
-    openssl x509 -req -days 365 -in ${DOMAIN}.csr -signkey ${DOMAIN}.key -outform CRT -out ${DOMAIN}.crt
+    openssl x509 -req -days 365 -in ${DOMAIN}.csr -signkey ${DOMAIN}.key -out ${DOMAIN}.crt
     sudo mv ${DOMAIN}.crt /etc/nginx/certificates/signed/${DOMAIN}.crt
     sudo mv ${DOMAIN}.key /etc/nginx/certificates/private/${DOMAIN}.key
     
