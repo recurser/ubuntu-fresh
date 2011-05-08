@@ -314,9 +314,8 @@ echo "#############################################################"
 echo "#                                                           #"
 echo "#            S U B V E R S I O N   H O S T I N G            #"
 echo "#                                                           #"
-echo "#  We need to collect some information about you before we  #"
-echo "#  begin. This will be used to set up a default user,       #"
-echo "#  hostname, and set your user's details in git             #"
+echo "#  We can set up the server to host subversion repositories #"
+echo "#  if you wish. If you don't know what this is, choose 'n'. #"
 echo "#                                                           #"
 echo "###############################################################"
 echo
@@ -336,7 +335,7 @@ if [ $ADD_SVN -eq 1 ]; then
     sudo sed -ri "s|__USER__|${NEW_USER}|g" /opt/subversion/access.policy
     # Create passwords file if necessary.
     sudo touch /opt/subversion/passwords
-    echo "Please enter a password for the subversion user (${NEW_USER}):"
+    echo "Please enter a password for the first subversion user (${NEW_USER}) - you can add others later:"
     sudo htpasswd /opt/subversion/passwords ${NEW_USER}
     # Make a new empty repository to hold the repos-style stuff.
     REPO_NAME=repos-web
