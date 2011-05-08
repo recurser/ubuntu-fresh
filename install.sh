@@ -296,15 +296,11 @@ if [ $ADD_SVN -eq 1 ]; then
     sudo find . -name "*.xsl" -exec svn propset svn:mime-type text/xsl {} \;
     sudo sed -ri 's|<xsl:param name="static">/repos-web/</xsl:param>|<xsl:param name="static">/svn/repos-web/</xsl:param>|' view/repos.xsl
     sudo sed -ri 's|<xsl:param name="startpage">/</xsl:param>|<xsl:param name="startpage">/svn/</xsl:param>|' view/repos.xsl
-    
     sudo svn commit -m "Initial commit."
     cd ../
     sudo rm -Rf repos-web.tar.gz repos-web
     # Fix permissions.
     sudo chown -R www-data:www-data /opt/subversion
-    # Add XSLT mime type for apache.
-    if [ `grep iptables-restore /etc/network/interfaces | wc -l` -eq 0 ]; then
-    sudo sed -ri "s|(application.xml[\s\t]+)xml xsl xsd|\1 xml xsl xsd xslt|" /etc/mime.types
     # Restart apache and nginx.
     sudo /etc/init.d/apache2 restart
 fi
