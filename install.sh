@@ -214,6 +214,9 @@ if [ ! -f /etc/apache2/sites-available/${DOMAIN} ]; then
     sudo ln -s /etc/apache2/sites-available/${DOMAIN} /etc/apache2/sites-enabled/001-${DOMAIN}
     sudo sed -ri "s|__DOMAIN__|${DOMAIN}|g" /etc/apache2/sites-available/${DOMAIN}
     sudo sed -ri "s|__DOMAIN__|${DOMAIN}|g" /etc/apache2/sites-available/default
+    # Put our default at last instead of first.
+    sudo rm -f /etc/apache2/sites-enabled/000-default /etc/apache2/sites-enabled/999-default
+    sudo ln -s /etc/apache2/sites-available/default /etc/apache2/sites-enabled/999-default
     
     sudo mkdir -p /var/www/${DOMAIN}/
     sudo cp ${CURR_DIR}/conf/index.html /var/www/${DOMAIN}/
@@ -234,9 +237,6 @@ if [ ! -f /etc/nginx/sites-available/${DOMAIN} ]; then
     sudo ln -s /etc/nginx/sites-available/${DOMAIN} /etc/nginx/sites-enabled/001-${DOMAIN}
     sudo sed -ri "s|__DOMAIN__|${DOMAIN}|g" /etc/nginx/sites-available/${DOMAIN}
     sudo sed -ri "s|__DOMAIN__|${DOMAIN}|g" /etc/nginx/sites-available/default
-    # Put our default at last instead of first.
-    sudo rm -f /etc/nginx/sites-enabled/000-default /etc/nginx/sites-enabled/999-default
-    sudo ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/999-default
     # Unlike apache, default config doesn't ship with a numeric prefix for some reason - fix this.
     if [ -f /etc/nginx/sites-enabled/default ]; then
         sudo mv /etc/nginx/sites-enabled/default /etc/nginx/sites-enabled/000-default
