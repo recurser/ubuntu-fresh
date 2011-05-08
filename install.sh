@@ -30,65 +30,6 @@ while [ -z "$EMAIL" ]; do
 done
 
 
-
-#--------------------------------------------------------------------
-#
-# S U B V E R S I O N
-#
-#--------------------------------------------------------------------
-if [ ! -f /etc/nginx/sites-available/svn.${DOMAIN} ]; then
-    ADD_SVN=0
-    read -p "Would you like this server to host subversion repositories (http://${DOMAIN}/svn/)? [y/N] " SVN_CHOICE
-    if [ $SVN_CHOICE == 'Y' -o $SVN_CHOICE == 'y' ]; then
-        ADD_SVN=1
-    fi
-    if [ $ADD_SVN -eq 1 ]; then
-        sudo mkdir -p /opt/subversion/repositories
-        # Apache config - over-write regular config with svn-specific one.
-        sudo cp ${CURR_DIR}/conf/apache-svn.conf /etc/apache2/sites-available/${DOMAIN}
-        sudo sed -ri "s|__DOMAIN__|${DOMAIN}|g" /etc/apache2/sites-available/${DOMAIN}
-        # Access policy.
-        sudo cp ${CURR_DIR}/conf/access.policy /opt/subversion/access.policy
-        # Create empty passwords file.
-        sudo touch /opt/subversion/passwords
-        # Make a new empty repository to hold the repos-style stuff.
-        REPO_NAME=repos-web
-        sudo rm -Rf /opt/subversion/repositories/${REPO_NAME}
-        sudo svnadmin create --fs-type fsfs /opt/subversion/repositories/${REPO_NAME}
-        sudo chown -R www-data:www-data /opt/subversion/repositories/${REPO_NAME}
-        sudo chmod -R g+w /opt/subversion/repositories/${REPO_NAME}
-        sudo chmod g+s /opt/subversion/repositories/${REPO_NAME}/db
-        # Set up repos-style in a new repository to make things look a bit nicer, and give us an example repository.
-        cd /tmp
-        sudo rm -Rf repos-web
-        sudo svn co https://labs.repos.se/data/style/tags/2.4/repos-web/
-        sudo find repos-web -name .svn -exec rm -Rf {} \; > /dev/null 2>&1;
-        sudo tar czf repos-web.tar.gz repos-web
-        sudo rm -Rf repos-web
-        sudo svn co file:///opt/subversion/repositories/repos-web
-        sudo tar xzf repos-web.tar.gz
-        cd repos-web
-        sudo svn stat | grep '?       ' | awk '{ print $2 }' | xargs svn add
-        sudo find . -name "*.xsl" -exec svn propset svn:mime-type text/xsl {} \;
-        sudo sed -ri 's|<xsl:param name="static">/repos-web/</xsl:param>|<xsl:param name="static">/svn/repos-web/</xsl:param>|' view/repos.xsl
-        sudo sed -ri 's|<xsl:param name="startpage">/</xsl:param>|<xsl:param name="startpage">/svn/</xsl:param>|' view/repos.xsl
-        
-        sudo svn commit -m "Initial commit."
-        cd ../
-        sudo rm -Rf repos-web.tar.gz repos-web
-        # Fix permissions.
-        sudo chown -R www-data:www-data /opt/subversion
-        # Add XSLT mime type for apache.
-        if [ `grep iptables-restore /etc/network/interfaces | wc -l` -eq 0 ]; then
-        sudo sed -ri "s|(application.xml[\s\t]+)xml xsl xsd|\1 xml xsl xsd xslt|" /etc/mime.types
-        # Restart apache and nginx.
-        sudo /etc/init.d/apache2 restart
-    fi
-fi
-
-exit
-
-
 #--------------------------------------------------------------------
 #
 # S E T   U P   G I T   N A M E   A N D   E M A I L
@@ -310,4 +251,60 @@ if [ ! -f /etc/nginx/sites-available/${DOMAIN} ]; then
     sudo mv ${DOMAIN}.key /etc/nginx/certificates/private/${DOMAIN}.key
     
     sudo /etc/init.d/nginx restart
+fi
+
+
+#--------------------------------------------------------------------
+#
+# S U B V E R S I O N
+#
+#--------------------------------------------------------------------
+if [ ! -f /etc/nginx/sites-available/svn.${DOMAIN} ]; then
+    ADD_SVN=0
+    read -p "Would you like this server to host subversion repositories (http://${DOMAIN}/svn/)? [y/N] " SVN_CHOICE
+    if [ $SVN_CHOICE == 'Y' -o $SVN_CHOICE == 'y' ]; then
+        ADD_SVN=1
+    fi
+    if [ $ADD_SVN -eq 1 ]; then
+        sudo mkdir -p /opt/subversion/repositories
+        # Apache config - over-write regular config with svn-specific one.
+        sudo cp ${CURR_DIR}/conf/apache-svn.conf /etc/apache2/sites-available/${DOMAIN}
+        sudo sed -ri "s|__DOMAIN__|${DOMAIN}|g" /etc/apache2/sites-available/${DOMAIN}
+        # Access policy.
+        sudo cp ${CURR_DIR}/conf/access.policy /opt/subversion/access.policy
+        # Create empty passwords file.
+        sudo touch /opt/subversion/passwords
+        # Make a new empty repository to hold the repos-style stuff.
+        REPO_NAME=repos-web
+        sudo rm -Rf /opt/subversion/repositories/${REPO_NAME}
+        sudo svnadmin create --fs-type fsfs /opt/subversion/repositories/${REPO_NAME}
+        sudo chown -R www-data:www-data /opt/subversion/repositories/${REPO_NAME}
+        sudo chmod -R g+w /opt/subversion/repositories/${REPO_NAME}
+        sudo chmod g+s /opt/subversion/repositories/${REPO_NAME}/db
+        # Set up repos-style in a new repository to make things look a bit nicer, and give us an example repository.
+        cd /tmp
+        sudo rm -Rf repos-web
+        sudo svn co https://labs.repos.se/data/style/tags/2.4/repos-web/
+        sudo find repos-web -name .svn -exec rm -Rf {} \; > /dev/null 2>&1;
+        sudo tar czf repos-web.tar.gz repos-web
+        sudo rm -Rf repos-web
+        sudo svn co file:///opt/subversion/repositories/repos-web
+        sudo tar xzf repos-web.tar.gz
+        cd repos-web
+        sudo svn stat | grep '?       ' | awk '{ print $2 }' | xargs svn add
+        sudo find . -name "*.xsl" -exec svn propset svn:mime-type text/xsl {} \;
+        sudo sed -ri 's|<xsl:param name="static">/repos-web/</xsl:param>|<xsl:param name="static">/svn/repos-web/</xsl:param>|' view/repos.xsl
+        sudo sed -ri 's|<xsl:param name="startpage">/</xsl:param>|<xsl:param name="startpage">/svn/</xsl:param>|' view/repos.xsl
+        
+        sudo svn commit -m "Initial commit."
+        cd ../
+        sudo rm -Rf repos-web.tar.gz repos-web
+        # Fix permissions.
+        sudo chown -R www-data:www-data /opt/subversion
+        # Add XSLT mime type for apache.
+        if [ `grep iptables-restore /etc/network/interfaces | wc -l` -eq 0 ]; then
+        sudo sed -ri "s|(application.xml[\s\t]+)xml xsl xsd|\1 xml xsl xsd xslt|" /etc/mime.types
+        # Restart apache and nginx.
+        sudo /etc/init.d/apache2 restart
+    fi
 fi
