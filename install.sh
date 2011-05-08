@@ -235,7 +235,7 @@ if [ ! -f /etc/nginx/sites-available/${DOMAIN} ]; then
     sudo sed -ri "s|__DOMAIN__|${DOMAIN}|g" /etc/nginx/sites-available/${DOMAIN}
     sudo sed -ri "s|__DOMAIN__|${DOMAIN}|g" /etc/nginx/sites-available/default
     # Put our default at last instead of first.
-    sudo rm -f /etc/nginx/sites-enabled/000-default
+    sudo rm -f /etc/nginx/sites-enabled/000-default /etc/nginx/sites-enabled/999-default
     sudo ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/999-default
     # Unlike apache, default config doesn't ship with a numeric prefix for some reason - fix this.
     if [ -f /etc/nginx/sites-enabled/default ]; then
