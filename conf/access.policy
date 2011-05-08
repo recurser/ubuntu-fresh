@@ -1,0 +1,7 @@
+[/]
+* = r
+__USER__ = rw
+
+[private-repo:/]
+* = 
+__USER__ = rw

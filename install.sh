@@ -2,6 +2,36 @@
 
 CURR_DIR=$(cd `dirname $0` && pwd)
 
+
+
+#--------------------------------------------------------------------
+#
+# S U B V E R S I O N
+#
+#--------------------------------------------------------------------
+if [ ! -f /etc/nginx/sites-available/svn.${DOMAIN} ]; then
+    ADD_SVN=0
+    read -p "Would you like this server to host subversion repositories (svn.${DOMAIN})? [y/N] " SVN_CHOICE
+    if [ $SVN_CHOICE == 'Y' -o $SVN_CHOICE == 'y' ]; then
+        ADD_SVN=1
+    fi
+    if [ $ADD_SVN -eq 1 ]; then
+        sudo mkdir -p /opt/subversion/repositories
+        # Apache config.
+        sudo cp ${CURR_DIR}/conf/apache-svn.conf /etc/apache2/sites-available/svn.${DOMAIN}
+        sudo ln -s /etc/apache2/sites-available/svn.${DOMAIN} /etc/apache2/sites-enabled/002-svn.${DOMAIN}
+        sudo sed -ri "s|__DOMAIN__|${DOMAIN}|g" /etc/apache2/sites-available/svn.${DOMAIN}
+        # Access policy.
+        sudo cp ${CURR_DIR}/conf/access.policy /opt/subversion/access.policy
+        # Create empty passwords file.
+        sudo touch /opt/subversion/passwords
+        # Restart apache.
+        sudo /etc/init.d/apache2 restart
+    fi
+fi
+
+exit
+
 #--------------------------------------------------------------------
 #
 # R E A D   I N   I N I T I A L   U S E R   D A T A
@@ -9,23 +39,23 @@ CURR_DIR=$(cd `dirname $0` && pwd)
 #--------------------------------------------------------------------
 
 # Read in the user name.
-while [ -z "$user" ]; do
+while [ -z "$NEW_USER" ]; do
     read -p "What username would you like to use? " user
 done
 
 # Read in the domain name.
-while [ -z "$domain" ]; do
-    read -p "What domain would you like to access your server with? " domain
+while [ -z "$DOMAIN" ]; do
+    read -p "What domain would you like to access your server with? " DOMAIN
 done
 
 # Read in the full name.
-while [ -z "$full_name" ]; do
-    read -p "What is your full name? " full_name
+while [ -z "$FULL_NAME" ]; do
+    read -p "What is your full name? " FULL_NAME
 done
 
 # Read in the full email address.
-while [ -z "$email" ]; do
-    read -p "What is your email address? " email
+while [ -z "$EMAIL" ]; do
+    read -p "What is your email address? " EMAIL
 done
 
 
@@ -35,11 +65,11 @@ done
 #
 #--------------------------------------------------------------------
 if [ `git config --global --get user.name | wc -l` -eq 0 ]; then
-    git config --global user.name $full_name
+    git config --global user.name $FULL_NAME
 fi
 
 if [ `git config --global --get user.email | wc -l` -eq 0 ]; then
-    git config --global user.email $email
+    git config --global user.email $EMAIL
 fi
 
 
@@ -63,6 +93,7 @@ sudo aptitude install -y \
     language-pack-ja \
     libapache2-mod-php5 \
     libapache2-mod-suphp \
+    libapache2-svn \
     locate \
     memcached \
     mercurial \
@@ -73,6 +104,7 @@ sudo aptitude install -y \
     openssh-blacklist \
     openssl-blacklist \
     php5 \
+    php-apc \
     php5-common \
     php5-curl \
     php5-dev \
@@ -122,7 +154,7 @@ if [ `grep UseDNS /etc/ssh/sshd_config | wc -l` -eq 0 ]; then
         su root -c "echo \"UseDNS no\" >> /etc/ssh/sshd_config"
 fi;
 if [ `grep AllowUsers /etc/ssh/sshd_config | wc -l` -eq 0 ]; then
-        su root -c "echo \"AllowUsers ${user}\" >> /etc/ssh/sshd_config"
+        su root -c "echo \"AllowUsers ${NEW_USER}\" >> /etc/ssh/sshd_config"
 fi;
 
 
@@ -131,8 +163,8 @@ fi;
 # H O S T N A M E
 #
 #--------------------------------------------------------------------
-sudo /bin/hostname $domain
-sudo sed -ri "s|^127\.0\.0\.1 localhost.*$|127.0.0.1 localhost $domain|" /etc/hosts
+sudo /bin/hostname $DOMAIN
+sudo sed -ri "s|^127\.0\.0\.1 localhost.*$|127.0.0.1 localhost ${DOMAIN}|" /etc/hosts
 
 
 #--------------------------------------------------------------------
@@ -187,30 +219,13 @@ su root -c "bash < <(curl -s -B https://rvm.beginrescueend.com/install/rvm)"
 # S E T   U P   U S E R   A C C O U N T
 #
 #--------------------------------------------------------------------
-if [ `grep $user /etc/passwd | wc -l` -eq 0 ]; then
-    echo "\n\n Adding a new user '$user' - please enter a password at the prompt."
-    sudo adduser --home /users/$user $user
-    mkdir -p /users/$user
-    chown $user:$user /users/$user
-    
-    # Add this user to sudoers.
-    if [ `grep "$user    ALL=(ALL) ALL" /etc/sudoers | wc -l` -eq 0 ]; then
-        sudo sed -r "s|^(root[\t\s]+ALL=.*)$|\1\n${user}\tALL=(ALL) ALL|g" /etc/sudoers
-    fi
-    
-    # Set up zsh and vim config etc.
-    chsh -s /usr/bin/zsh $user
+if [ `grep $NEW_USER /etc/passwd | wc -l` -eq 0 ]; then
     cd /tmp
     rm -Rf home-config
     git clone git://github.com/recurser/home-config.git
     cd home-config
-    sudo ./install.sh $user
+    sudo ./install.sh $NEW_USER
 fi;
-
-# Make zsh the default shell.
-if ! id $user > /dev/null 2>&1; then
-    chsh user /usr/bin/zsh
-fi
 
 
 #--------------------------------------------------------------------
@@ -218,17 +233,17 @@ fi
 # A P A C H E
 #
 #--------------------------------------------------------------------
-if [ ! -f /etc/apache2/sites-available/${domain} ]; then
+if [ ! -f /etc/apache2/sites-available/${DOMAIN} ]; then
     su root -c "echo \"Listen 8080\" > /etc/apache2/ports.conf"
     sudo cp ${CURR_DIR}/conf/apache-default.conf /etc/apache2/sites-available/default
-    sudo cp ${CURR_DIR}/conf/apache-domain.conf /etc/apache2/sites-available/${domain}
-    sudo ln -s /etc/apache2/sites-available/${domain} /etc/apache2/sites-enabled/001-${domain}
-    sudo sed -ri "s|__DOMAIN__|${domain}|g" /etc/apache2/sites-available/${domain}
-    sudo sed -ri "s|__DOMAIN__|${domain}|g" /etc/apache2/sites-available/default
+    sudo cp ${CURR_DIR}/conf/apache-domain.conf /etc/apache2/sites-available/${DOMAIN}
+    sudo ln -s /etc/apache2/sites-available/${DOMAIN} /etc/apache2/sites-enabled/001-${DOMAIN}
+    sudo sed -ri "s|__DOMAIN__|${DOMAIN}|g" /etc/apache2/sites-available/${DOMAIN}
+    sudo sed -ri "s|__DOMAIN__|${DOMAIN}|g" /etc/apache2/sites-available/default
     
-    sudo mkdir -p /var/www/${domain}/
-    sudo cp ${CURR_DIR}/conf/index.html /var/www/${domain}/
-    sudo sed -ri "s|__DOMAIN__|${domain}|g" /var/www/${domain}/index.html
+    sudo mkdir -p /var/www/${DOMAIN}/
+    sudo cp ${CURR_DIR}/conf/index.html /var/www/${DOMAIN}/
+    sudo sed -ri "s|__DOMAIN__|${DOMAIN}|g" /var/www/${DOMAIN}/index.html
     
     sudo /etc/init.d/apache2 restart
 fi
@@ -239,12 +254,12 @@ fi
 # N G I N X
 #
 #--------------------------------------------------------------------
-if [ ! -f /etc/nginx/sites-available/${domain} ]; then
-    sudo cp ${CURR_DIR}/conf/nginx-domain.conf /etc/nginx/sites-available/${domain}
-    sudo ln -s /etc/nginx/sites-available/${domain} /etc/nginx/sites-enabled/001-${domain}
-    sudo sed -ri "s|__DOMAIN__|${domain}|g" /etc/nginx/sites-available/${domain}
+if [ ! -f /etc/nginx/sites-available/${DOMAIN} ]; then
+    sudo cp ${CURR_DIR}/conf/nginx-domain.conf /etc/nginx/sites-available/${DOMAIN}
+    sudo ln -s /etc/nginx/sites-available/${DOMAIN} /etc/nginx/sites-enabled/001-${DOMAIN}
+    sudo sed -ri "s|__DOMAIN__|${DOMAIN}|g" /etc/nginx/sites-available/${DOMAIN}
     
-    # Unlike apache, default config doesn't ship with a numeric prefix for some reason.
+    # Unlike apache, default config doesn't ship with a numeric prefix for some reason - fix this.
     if [ -f /etc/nginx/sites-enabled/default ]; then
         sudo mv /etc/nginx/sites-enabled/default /etc/nginx/sites-enabled/000-default
     fi
@@ -252,10 +267,15 @@ if [ ! -f /etc/nginx/sites-available/${domain} ]; then
     # Make SSL certificate.
     sudo mkdir -p /etc/nginx/certificates/signed
     sudo mkdir -p /etc/nginx/certificates/private
-    openssl req -x509 -newkey rsa:2048 -out ${domain}.pem -outform PEM -days 1825
-    sudo mv ${domain}.pem /etc/nginx/certificates/signed
-    sudo mv privkey.pem /etc/nginx/certificates/private/${domain}.key
-    openssl x509 -in /etc/nginx/certificates/signed/${domain}.pem -out /etc/nginx/certificates/signed/${domain}.crt
+    rm -f ${DOMAIN}.csr ${DOMAIN}.key ${DOMAIN}.crt
+    openssl genrsa -des3 -out ${DOMAIN}.key 1024
+    openssl req -new -key ${DOMAIN}.key -out ${DOMAIN}.csr
+    mv ${DOMAIN}.key ${DOMAIN}.key.orig
+    openssl rsa -in ${DOMAIN}.key.orig -out ${DOMAIN}.key
+    rm ${DOMAIN}.key.orig
+    openssl x509 -req -days 365 -in ${DOMAIN}.csr -signkey ${DOMAIN}.key -outform CRT -out ${DOMAIN}.crt
+    sudo mv ${DOMAIN}.crt /etc/nginx/certificates/signed/${DOMAIN}.crt
+    sudo mv ${DOMAIN}.key /etc/nginx/certificates/private/${DOMAIN}.key
     
     sudo /etc/init.d/nginx restart
 fi
