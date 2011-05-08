@@ -49,8 +49,8 @@ fi
 # I N S T A L L   B A S E   P A C K A G E S
 #
 #--------------------------------------------------------------------
-sudo apt-get update
-sudo apt-get upgrade
+sudo apt-get update -y
+sudo apt-get upgrade -y
 
 sudo aptitude install -y \
     apache2 \
@@ -114,19 +114,19 @@ sudo sed -ri "s|X11Forwarding yes|X11Forwarding no|" /etc/ssh/sshd_config
 sudo sed -ri "s|UseDNS yes|UseDNS no|" /etc/ssh/sshd_config
 sudo sed -ri "s|UsePAM yes|UsePAM no|" /etc/ssh/sshd_config
 if [ `grep PermitRootLogin /etc/ssh/sshd_config | wc -l` -eq 0 ]; then
-    su root -c "echo -n \"PermitRootLogin no\n\" >> /etc/ssh/sshd_config"
+    sudo su root -c "echo -n \"PermitRootLogin no\n\" >> /etc/ssh/sshd_config"
 fi
 if [ `grep X11Forwarding /etc/ssh/sshd_config | wc -l` -eq 0 ]; then
-    su root -c "echo \"X11Forwarding no\" >> /etc/ssh/sshd_config"
+    sudo su root -c "echo \"X11Forwarding no\" >> /etc/ssh/sshd_config"
 fi
 if [ `grep UsePAM /etc/ssh/sshd_config | wc -l` -eq 0 ]; then
-    su root -c "echo \"UsePam no\" >> /etc/ssh/sshd_config"
+    sudo su root -c "echo \"UsePam no\" >> /etc/ssh/sshd_config"
 fi
 if [ `grep UseDNS /etc/ssh/sshd_config | wc -l` -eq 0 ]; then
-        su root -c "echo \"UseDNS no\" >> /etc/ssh/sshd_config"
+        sudo su root -c "echo \"UseDNS no\" >> /etc/ssh/sshd_config"
 fi;
 if [ `grep AllowUsers /etc/ssh/sshd_config | wc -l` -eq 0 ]; then
-        su root -c "echo \"AllowUsers ${NEW_USER}\" >> /etc/ssh/sshd_config"
+        sudo su root -c "echo \"AllowUsers ${NEW_USER}\" >> /etc/ssh/sshd_config"
 fi;
 
 
@@ -185,7 +185,7 @@ sudo gem install --no-rdoc --no-ri \
     rake
     
 # Setup rvm.
-su root -c "bash < <(curl -s -B https://rvm.beginrescueend.com/install/rvm)"
+sudo su root -c "bash < <(curl -s -B https://rvm.beginrescueend.com/install/rvm)"
 
 
 #--------------------------------------------------------------------
@@ -208,7 +208,7 @@ fi;
 #
 #--------------------------------------------------------------------
 if [ ! -f /etc/apache2/sites-available/${DOMAIN} ]; then
-    su root -c "echo \"Listen 8080\" > /etc/apache2/ports.conf"
+    sudo su root -c "echo \"Listen 8080\" > /etc/apache2/ports.conf"
     sudo cp ${CURR_DIR}/conf/apache-default.conf /etc/apache2/sites-available/default
     sudo cp ${CURR_DIR}/conf/apache-domain.conf /etc/apache2/sites-available/${DOMAIN}
     sudo ln -s /etc/apache2/sites-available/${DOMAIN} /etc/apache2/sites-enabled/001-${DOMAIN}
@@ -217,10 +217,14 @@ if [ ! -f /etc/apache2/sites-available/${DOMAIN} ]; then
     # Put our default at last instead of first.
     sudo rm -f /etc/apache2/sites-enabled/000-default /etc/apache2/sites-enabled/999-default
     sudo ln -s /etc/apache2/sites-available/default /etc/apache2/sites-enabled/999-default
-    
+    # Set up DocumentRoot
     sudo mkdir -p /var/www/${DOMAIN}/
     sudo cp ${CURR_DIR}/conf/index.html /var/www/${DOMAIN}/
     sudo sed -ri "s|__DOMAIN__|${DOMAIN}|g" /var/www/${DOMAIN}/index.html
+    sudo chown -R www-data:www-data /var/www/${DOMAIN}/
+    sudo chmod -R g+w /var/www/${DOMAIN}/
+    # Add phpinfo() just for kicks :)
+    sudo su root -c "echo \"<?= phpinfo() ?>\" > /var/www/${DOMAIN}/info.php"
     
     sudo /etc/init.d/apache2 restart
 fi
