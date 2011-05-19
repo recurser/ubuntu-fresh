@@ -103,6 +103,7 @@ sudo aptitude install -y \
     openssl-blacklist \
     php5 \
     php-apc \
+    php5-cli \
     php5-common \
     php5-curl \
     php5-dev \
