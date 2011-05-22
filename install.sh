@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+# Make sure we're running as root.
+if [ $USER != 'root' ]; then
+  echo "This script must be run as the 'root' user."
+  exit
+fi
+
 # Function for confirming choices with the user.
 function confirm() {
     read -p "$@ [Y/n]" answer
@@ -76,10 +82,10 @@ fi
 # I N S T A L L   B A S E   P A C K A G E S
 #
 #--------------------------------------------------------------------
-sudo apt-get update -y
-sudo apt-get upgrade -y
+apt-get update -y
+apt-get upgrade -y
 
-sudo aptitude install -y \
+aptitude install -y \
     apache2 \
     build-essential \
     curl \
@@ -132,7 +138,7 @@ sudo aptitude install -y \
     zsh
     
 # Initialize the 'locate' database.
-sudo updatedb
+updatedb
 
 
 #--------------------------------------------------------------------
@@ -140,24 +146,24 @@ sudo updatedb
 # S S H   C O N F I G
 #
 #--------------------------------------------------------------------
-sudo sed -ri "s|PermitRootLogin yes|PermitRootLogin no|" /etc/ssh/sshd_config
-sudo sed -ri "s|X11Forwarding yes|X11Forwarding no|" /etc/ssh/sshd_config
-sudo sed -ri "s|UseDNS yes|UseDNS no|" /etc/ssh/sshd_config
-sudo sed -ri "s|UsePAM yes|UsePAM no|" /etc/ssh/sshd_config
+sed -ri "s|PermitRootLogin yes|PermitRootLogin no|" /etc/ssh/sshd_config
+sed -ri "s|X11Forwarding yes|X11Forwarding no|" /etc/ssh/sshd_config
+sed -ri "s|UseDNS yes|UseDNS no|" /etc/ssh/sshd_config
+sed -ri "s|UsePAM yes|UsePAM no|" /etc/ssh/sshd_config
 if [ `grep PermitRootLogin /etc/ssh/sshd_config | wc -l` -eq 0 ]; then
-    sudo su root -c "echo -n \"PermitRootLogin no\n\" >> /etc/ssh/sshd_config"
+    echo -n "PermitRootLogin no\n" >> /etc/ssh/sshd_config
 fi
 if [ `grep X11Forwarding /etc/ssh/sshd_config | wc -l` -eq 0 ]; then
-    sudo su root -c "echo \"X11Forwarding no\" >> /etc/ssh/sshd_config"
+    echo "X11Forwarding no" >> /etc/ssh/sshd_config
 fi
 if [ `grep UsePAM /etc/ssh/sshd_config | wc -l` -eq 0 ]; then
-    sudo su root -c "echo \"UsePam no\" >> /etc/ssh/sshd_config"
+    echo "UsePam no" >> /etc/ssh/sshd_config
 fi
 if [ `grep UseDNS /etc/ssh/sshd_config | wc -l` -eq 0 ]; then
-        sudo su root -c "echo \"UseDNS no\" >> /etc/ssh/sshd_config"
+        echo "UseDNS no" >> /etc/ssh/sshd_config
 fi;
 if [ `grep AllowUsers /etc/ssh/sshd_config | wc -l` -eq 0 ]; then
-        sudo su root -c "echo \"AllowUsers ${NEW_USER}\" >> /etc/ssh/sshd_config"
+        echo "AllowUsers ${NEW_USER}" >> /etc/ssh/sshd_config
 fi;
 
 
@@ -166,8 +172,8 @@ fi;
 # H O S T N A M E
 #
 #--------------------------------------------------------------------
-sudo sed -ri "s|^127\.0\.0\.1 localhost.*$|127.0.0.1 localhost ${DOMAIN}|" /etc/hosts
-sudo /bin/hostname $  
+sed -ri "s|^127\.0\.0\.1 localhost.*$|127.0.0.1 localhost ${DOMAIN}|" /etc/hosts
+/bin/hostname $DOMAIN
 
 
 #--------------------------------------------------------------------
@@ -176,12 +182,12 @@ sudo /bin/hostname $
 #
 #--------------------------------------------------------------------
 if [ ! -f /etc/iptables.up.rules ]; then
-    sudo iptables-restore < conf/iptables.up.rules
-    sudo cp ${CURR_DIR}/conf/iptables.up.rules /etc/iptables.up.rules
+    iptables-restore < conf/iptables.up.rules
+    cp ${CURR_DIR}/conf/iptables.up.rules /etc/iptables.up.rules
 fi
 if [ `grep iptables-restore /etc/network/interfaces | wc -l` -eq 0 ]; then
-    sudo sed -ri "s|iface lo inet loopback|iface lo inet loopback\npre-up iptables-restore < /etc/iptables.up.rules|" /etc/network/interfaces
-    sudo /etc/init.d/ssh reload
+    sed -ri "s|iface lo inet loopback|iface lo inet loopback\npre-up iptables-restore < /etc/iptables.up.rules|" /etc/network/interfaces
+    /etc/init.d/ssh reload
 fi
 
 
@@ -203,11 +209,11 @@ if [ $install_rubygems -eq 1 ]; then
     wget http://production.cf.rubygems.org/rubygems/rubygems-1.7.2.tgz
     tar xvzf rubygems-1.7.2.tgz
     cd rubygems-1.7.2
-    sudo ruby setup.rb
-    sudo ln -s /usr/bin/gem1.8 /usr/bin/gem
+    ruby setup.rb
+    ln -s /usr/bin/gem1.8 /usr/bin/gem
 fi
 
-sudo gem install --no-rdoc --no-ri \
+gem install --no-rdoc --no-ri \
     bundler \
     capistrano \
     git-up \
@@ -216,7 +222,7 @@ sudo gem install --no-rdoc --no-ri \
     rake
     
 # Setup rvm.
-sudo su root -c "bash < <(curl -s -B https://rvm.beginrescueend.com/install/rvm)"
+bash < <(curl -s -B https://rvm.beginrescueend.com/install/rvm)
 
 
 #--------------------------------------------------------------------
@@ -224,13 +230,11 @@ sudo su root -c "bash < <(curl -s -B https://rvm.beginrescueend.com/install/rvm)
 # S E T   U P   U S E R   A C C O U N T
 #
 #--------------------------------------------------------------------
-if [ `grep $NEW_USER /etc/passwd | wc -l` -eq 0 ]; then
-    cd /tmp
-    rm -Rf home-config
-    git clone git://github.com/recurser/home-config.git
-    cd home-config
-    sudo ./install.sh $NEW_USER
-fi;
+cd /tmp
+rm -Rf home-config
+git clone git://github.com/recurser/home-config.git
+cd home-config
+./install.sh $NEW_USER
 
 
 #--------------------------------------------------------------------
@@ -239,25 +243,25 @@ fi;
 #
 #--------------------------------------------------------------------
 if [ ! -f /etc/apache2/sites-available/${DOMAIN} ]; then
-    sudo su root -c "echo \"Listen 8080\" > /etc/apache2/ports.conf"
-    sudo cp ${CURR_DIR}/conf/apache-default.conf /etc/apache2/sites-available/default
-    sudo cp ${CURR_DIR}/conf/apache-domain.conf /etc/apache2/sites-available/${DOMAIN}
-    sudo ln -s /etc/apache2/sites-available/${DOMAIN} /etc/apache2/sites-enabled/001-${DOMAIN}
-    sudo sed -ri "s|__DOMAIN__|${DOMAIN}|g" /etc/apache2/sites-available/${DOMAIN}
-    sudo sed -ri "s|__DOMAIN__|${DOMAIN}|g" /etc/apache2/sites-available/default
+    echo "Listen 8080" > /etc/apache2/ports.conf
+    cp ${CURR_DIR}/conf/apache-default.conf /etc/apache2/sites-available/default
+    cp ${CURR_DIR}/conf/apache-domain.conf /etc/apache2/sites-available/${DOMAIN}
+    ln -s /etc/apache2/sites-available/${DOMAIN} /etc/apache2/sites-enabled/001-${DOMAIN}
+    sed -ri "s|__DOMAIN__|${DOMAIN}|g" /etc/apache2/sites-available/${DOMAIN}
+    sed -ri "s|__DOMAIN__|${DOMAIN}|g" /etc/apache2/sites-available/default
     # Put our default at last instead of first.
-    sudo rm -f /etc/apache2/sites-enabled/000-default /etc/apache2/sites-enabled/999-default
-    sudo ln -s /etc/apache2/sites-available/default /etc/apache2/sites-enabled/999-default
+    rm -f /etc/apache2/sites-enabled/000-default /etc/apache2/sites-enabled/999-default
+    ln -s /etc/apache2/sites-available/default /etc/apache2/sites-enabled/999-default
     # Set up DocumentRoot
-    sudo mkdir -p /var/www/${DOMAIN}/
-    sudo cp ${CURR_DIR}/conf/index.html /var/www/${DOMAIN}/
-    sudo sed -ri "s|__DOMAIN__|${DOMAIN}|g" /var/www/${DOMAIN}/index.html
-    sudo chown -R www-data:www-data /var/www/${DOMAIN}/
-    sudo chmod -R g+w /var/www/${DOMAIN}/
+    mkdir -p /var/www/${DOMAIN}/
+    cp ${CURR_DIR}/conf/index.html /var/www/${DOMAIN}/
+    sed -ri "s|__DOMAIN__|${DOMAIN}|g" /var/www/${DOMAIN}/index.html
+    chown -R www-data:www-data /var/www/${DOMAIN}/
+    chmod -R g+w /var/www/${DOMAIN}/
     # Add phpinfo() just for kicks :)
-    sudo su root -c "echo \"<?= phpinfo() ?>\" > /var/www/${DOMAIN}/info.php"
+    echo "<?= phpinfo() ?>" > /var/www/${DOMAIN}/info.php
     
-    sudo /etc/init.d/apache2 restart
+    /etc/init.d/apache2 restart
 fi
 
 
@@ -267,14 +271,14 @@ fi
 #
 #--------------------------------------------------------------------
 if [ ! -f /etc/nginx/sites-available/${DOMAIN} ]; then
-    sudo cp ${CURR_DIR}/conf/nginx-default.conf /etc/nginx/sites-available/default
-    sudo cp ${CURR_DIR}/conf/nginx-domain.conf /etc/nginx/sites-available/${DOMAIN}
-    sudo ln -s /etc/nginx/sites-available/${DOMAIN} /etc/nginx/sites-enabled/001-${DOMAIN}
-    sudo sed -ri "s|__DOMAIN__|${DOMAIN}|g" /etc/nginx/sites-available/${DOMAIN}
-    sudo sed -ri "s|__DOMAIN__|${DOMAIN}|g" /etc/nginx/sites-available/default
+    cp ${CURR_DIR}/conf/nginx-default.conf /etc/nginx/sites-available/default
+    cp ${CURR_DIR}/conf/nginx-domain.conf /etc/nginx/sites-available/${DOMAIN}
+    ln -s /etc/nginx/sites-available/${DOMAIN} /etc/nginx/sites-enabled/001-${DOMAIN}
+    sed -ri "s|__DOMAIN__|${DOMAIN}|g" /etc/nginx/sites-available/${DOMAIN}
+    sed -ri "s|__DOMAIN__|${DOMAIN}|g" /etc/nginx/sites-available/default
     # Unlike apache, default config doesn't ship with a numeric prefix for some reason - fix this.
     if [ -f /etc/nginx/sites-enabled/default ]; then
-        sudo mv /etc/nginx/sites-enabled/default /etc/nginx/sites-enabled/000-default
+        mv /etc/nginx/sites-enabled/default /etc/nginx/sites-enabled/000-default
     fi
     
     # Make SSL certificate.
@@ -292,16 +296,16 @@ if [ ! -f /etc/nginx/sites-available/${DOMAIN} ]; then
     echo "#############################################################"
     echo
     
-    sudo mkdir -p /etc/nginx/certificates/signed
-    sudo mkdir -p /etc/nginx/certificates/private
+    mkdir -p /etc/nginx/certificates/signed
+    mkdir -p /etc/nginx/certificates/private
     rm -f ${DOMAIN}.csr ${DOMAIN}.key ${DOMAIN}.crt
     openssl genrsa -des3 -out ${DOMAIN}.key 1024
     openssl req -new -nodes -keyout ${DOMAIN}.key -out ${DOMAIN}.csr
     openssl x509 -req -days 365 -in ${DOMAIN}.csr -signkey ${DOMAIN}.key -out ${DOMAIN}.crt
-    sudo mv ${DOMAIN}.crt /etc/nginx/certificates/signed/${DOMAIN}.crt
-    sudo mv ${DOMAIN}.key /etc/nginx/certificates/private/${DOMAIN}.key
+    mv ${DOMAIN}.crt /etc/nginx/certificates/signed/${DOMAIN}.crt
+    mv ${DOMAIN}.key /etc/nginx/certificates/private/${DOMAIN}.key
     
-    sudo /etc/init.d/nginx restart
+    /etc/init.d/nginx restart
 fi
 
 
@@ -330,51 +334,51 @@ if [ $? -eq 1 ]; then
     ADD_SVN=1
 fi
 if [ $ADD_SVN -eq 1 ]; then
-    sudo mkdir -p /opt/subversion/repositories
+    mkdir -p /opt/subversion/repositories
     # Apache config - over-write regular config with svn-specific one.
-    sudo cp ${CURR_DIR}/conf/apache-svn.conf /etc/apache2/sites-available/${DOMAIN}
-    sudo sed -ri "s|__DOMAIN__|${DOMAIN}|g" /etc/apache2/sites-available/${DOMAIN}
+    cp ${CURR_DIR}/conf/apache-svn.conf /etc/apache2/sites-available/${DOMAIN}
+    sed -ri "s|__DOMAIN__|${DOMAIN}|g" /etc/apache2/sites-available/${DOMAIN}
     # Access policy.
-    sudo cp ${CURR_DIR}/conf/access.policy /opt/subversion/access.policy
-    sudo sed -ri "s|__USER__|${NEW_USER}|g" /opt/subversion/access.policy
+    cp ${CURR_DIR}/conf/access.policy /opt/subversion/access.policy
+    sed -ri "s|__USER__|${NEW_USER}|g" /opt/subversion/access.policy
     # Create passwords file if necessary.
-    sudo touch /opt/subversion/passwords
+    touch /opt/subversion/passwords
     echo "Please enter a password for the first subversion user (${NEW_USER}) - you can add others later:"
-    sudo htpasswd /opt/subversion/passwords ${NEW_USER}
+    htpasswd /opt/subversion/passwords ${NEW_USER}
     # Make a new empty repository to hold the repos-style stuff.
     REPO_NAME=repos-web
-    sudo rm -Rf /opt/subversion/repositories/${REPO_NAME}
-    sudo svnadmin create --fs-type fsfs /opt/subversion/repositories/${REPO_NAME}
-    sudo chmod -R g+w /opt/subversion/repositories/${REPO_NAME}
-    sudo chmod g+s /opt/subversion/repositories/${REPO_NAME}/db
+    rm -Rf /opt/subversion/repositories/${REPO_NAME}
+    svnadmin create --fs-type fsfs /opt/subversion/repositories/${REPO_NAME}
+    chmod -R g+w /opt/subversion/repositories/${REPO_NAME}
+    chmod g+s /opt/subversion/repositories/${REPO_NAME}/db
     # Set up repos-style in a new repository to make things look a bit nicer, and give us an example repository.
     cd /tmp
-    sudo rm -Rf repos-web
-    sudo svn co https://labs.repos.se/data/style/tags/2.4/repos-web/
-    sudo find repos-web -name .svn -exec rm -Rf {} \; > /dev/null 2>&1;
-    sudo tar czf repos-web.tar.gz repos-web
-    sudo rm -Rf repos-web
-    sudo svn co file:///opt/subversion/repositories/repos-web
-    sudo tar xzf repos-web.tar.gz
+    rm -Rf repos-web
+    svn co https://labs.repos.se/data/style/tags/2.4/repos-web/
+    find repos-web -name .svn -exec rm -Rf {} \; > /dev/null 2>&1;
+    tar czf repos-web.tar.gz repos-web
+    rm -Rf repos-web
+    svn co file:///opt/subversion/repositories/repos-web
+    tar xzf repos-web.tar.gz
     cd repos-web
-    sudo svn stat | grep '?       ' | awk '{ print $2 }' | xargs svn add
-    sudo sed -ri 's|<xsl:param name="static">/repos-web/</xsl:param>|<xsl:param name="static">/svn/repos-web/</xsl:param>|' view/repos.xsl
-    sudo sed -ri 's|<xsl:param name="startpage">/</xsl:param>|<xsl:param name="startpage">/svn/</xsl:param>|' view/repos.xsl
-    sudo svn commit -m "Initial commit."
-    sudo find . -name "*.xsl" -exec svn propset svn:mime-type text/xsl {} \;
-    sudo svn commit -m "Fixed some mime-type issues for XSL."
+    svn stat | grep '?       ' | awk '{ print $2 }' | xargs svn add
+    sed -ri 's|<xsl:param name="static">/repos-web/</xsl:param>|<xsl:param name="static">/svn/repos-web/</xsl:param>|' view/repos.xsl
+    sed -ri 's|<xsl:param name="startpage">/</xsl:param>|<xsl:param name="startpage">/svn/</xsl:param>|' view/repos.xsl
+    svn commit -m "Initial commit."
+    find . -name "*.xsl" -exec svn propset svn:mime-type text/xsl {} \;
+    svn commit -m "Fixed some mime-type issues for XSL."
     cd ../
-    sudo rm -Rf repos-web.tar.gz repos-web
+    rm -Rf repos-web.tar.gz repos-web
     # Make a private repository to demonstrate the access control.
     REPO_NAME=private-repo
-    sudo rm -Rf /opt/subversion/repositories/${REPO_NAME}
-    sudo svnadmin create --fs-type fsfs /opt/subversion/repositories/${REPO_NAME}
-    sudo chmod -R g+w /opt/subversion/repositories/${REPO_NAME}
-    sudo chmod g+s /opt/subversion/repositories/${REPO_NAME}/db
+    rm -Rf /opt/subversion/repositories/${REPO_NAME}
+    svnadmin create --fs-type fsfs /opt/subversion/repositories/${REPO_NAME}
+    chmod -R g+w /opt/subversion/repositories/${REPO_NAME}
+    chmod g+s /opt/subversion/repositories/${REPO_NAME}/db
     # Fix permissions.
-    sudo chown -R www-data:www-data /opt/subversion
+    chown -R www-data:www-data /opt/subversion
     # Restart apache and nginx.
-    sudo /etc/init.d/apache2 restart
+    /etc/init.d/apache2 restart
 fi
 
 
@@ -401,7 +405,7 @@ if [ $ADD_GIT -eq 1 ]; then
   rm -Rf home-config
   git clone git://github.com/recurser/home-config.git
   cd home-config
-  sudo ./install.sh git
+  ./install.sh git
   
   cd /tmp/
   git clone git://github.com/sitaramc/gitolite.git
