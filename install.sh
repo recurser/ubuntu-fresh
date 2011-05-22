@@ -82,6 +82,7 @@ sudo apt-get upgrade -y
 sudo aptitude install -y \
     apache2 \
     build-essential \
+    curl \
     exuberant-ctags \
     fail2ban \
     fakeroot \
