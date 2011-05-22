@@ -116,6 +116,7 @@ sudo aptitude install -y \
     ruby-dev \
     rvm \
     screen \
+    ssh-server \
     ssl-cert \
     subversion \
     subversion-tools \
@@ -163,8 +164,8 @@ fi;
 # H O S T N A M E
 #
 #--------------------------------------------------------------------
-sudo /bin/hostname $DOMAIN
 sudo sed -ri "s|^127\.0\.0\.1 localhost.*$|127.0.0.1 localhost ${DOMAIN}|" /etc/hosts
+sudo /bin/hostname $  
 
 
 #--------------------------------------------------------------------
@@ -316,7 +317,7 @@ echo "#                                                           #"
 echo "#            S U B V E R S I O N   H O S T I N G            #"
 echo "#                                                           #"
 echo "#  We can set up the server to host subversion repositories #"
-echo "#  if you wish. If you don't know what this is, choose 'n'. #"
+echo "#  if you wish. If you are not sure, choose 'n'.            #"
 echo "#                                                           #"
 echo "###############################################################"
 echo
@@ -372,4 +373,36 @@ if [ $ADD_SVN -eq 1 ]; then
     sudo chown -R www-data:www-data /opt/subversion
     # Restart apache and nginx.
     sudo /etc/init.d/apache2 restart
+fi
+
+
+echo
+echo
+echo "#############################################################"
+echo "#                                                           #"
+echo "#                   G I T   H O S T I N G                   #"
+echo "#                                                           #"
+echo "#  We can set up the server to host git repositories if you #"
+echo "#  wish. If you are not sure, choose 'n'.                   #"
+echo "#                                                           #"
+echo "###############################################################"
+echo
+
+ADD_GIT=0
+confirm "Would you like this server to host git repositories (http://${DOMAIN}/svn/)?"
+if [ $? -eq 1 ]; then
+    ADD_GIT=1
+fi
+if [ $ADD_GIT -eq 1 ]; then
+  # Add a 'git' user.
+  cd /tmp
+  rm -Rf home-config
+  git clone git://github.com/recurser/home-config.git
+  cd home-config
+  sudo ./install.sh git
+  
+  cd /tmp/
+  git clone git://github.com/sitaramc/gitolite.git
+  cd gitolite
+  make master.tar
 fi
