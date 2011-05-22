@@ -172,7 +172,7 @@ fi;
 # H O S T N A M E
 #
 #--------------------------------------------------------------------
-sed -ri "s|^127\.0\.0\.1 localhost.*$|127.0.0.1 localhost ${DOMAIN}|" /etc/hosts
+sed -ri "s|^127\.0\.0\.1[\s\t]+localhost.*$|127.0.0.1 localhost ${DOMAIN}|" /etc/hosts
 /bin/hostname $DOMAIN
 
 
@@ -400,15 +400,56 @@ if [ $? -eq 1 ]; then
     ADD_GIT=1
 fi
 if [ $ADD_GIT -eq 1 ]; then
-  # Add a 'git' user.
-  cd /tmp
-  rm -Rf home-config
-  git clone git://github.com/recurser/home-config.git
-  cd home-config
-  ./install.sh git
-  
-  cd /tmp/
-  git clone git://github.com/sitaramc/gitolite.git
-  cd gitolite
-  make master.tar
+    # Add a 'git' user.
+    GIT_USER=git
+    cd /tmp
+    rm -Rf home-config
+    git clone git://github.com/recurser/home-config.git
+    cd home-config
+    ./install.sh $GIT_USER
+    
+    # Make sure the git user is alllowed to SSH.
+    if [ `grep "AllowUsers.*git" /etc/ssh/sshd_config | wc -l` -eq 0 ]; then
+        sed -ri "s|^(AllowUsers.*)$|\1 ${GIT_USER}|" /etc/ssh/sshd_config
+        sudo /etc/init.d/ssh restart
+    fi;
+    
+    # Get the home directory of the git user.
+    su $GIT_USER -c "echo \$HOME" > /tmp/${GIT_USER}_HOME
+    GIT_USER_HOME=`cat /tmp/${GIT_USER}_HOME`
+    rm /tmp/${GIT_USER}_HOME
+    
+    # Add the gitolite path for the git user's zsh profile.
+    touch ${GIT_USER_HOME}/.zshrc.local
+    if [ `grep /opt/bin/gitolite ${GIT_USER_HOME}/.zshrc.local | wc -l` -eq 0 ]; then
+        echo "PATH=/opt/gitolite/bin:\$PATH" >> ${GIT_USER_HOME}/.zshrc.local
+    fi
+    chown ${GIT_USER}:${GIT_USER} ${GIT_USER_HOME}/.zshrc.local
+    
+    # Add the gitolite path for the git user's bash profile.
+    touch ${GIT_USER_HOME}/.bash_profile
+    if [ `grep /opt/bin/gitolite ${GIT_USER_HOME}/.bash_profile | wc -l` -eq 0 ]; then
+        echo "PATH=/opt/gitolite/bin:\$PATH" >> ${GIT_USER_HOME}/.bash_profile
+    fi
+    chown ${GIT_USER}:${GIT_USER} ${GIT_USER_HOME}/.bash_profile
+    
+    # Copy NEW_USER's public key to /tmp/.
+    su $NEW_USER -c "echo \$HOME" > /tmp/${NEW_USER}_HOME
+    NEW_USER_HOME=`cat /tmp/${NEW_USER}_HOME`
+    rm /tmp/${NEW_USER}_HOME
+    cp ${NEW_USER_HOME}/.ssh/id_rsa.pub /tmp/${NEW_USER}.pub
+    
+    # Install gitolite server.
+    cd /tmp/
+    rm -Rf gitolite-source
+    git clone git://github.com/sitaramc/gitolite gitolite-source
+    cd gitolite-source
+    mkdir -p /opt/gitolite/conf /opt/gitolite/hooks
+    src/gl-system-install /opt/gitolite/bin /opt/gitolite/conf /opt/gitolite/hooks
+    chown -R git:git /opt/gitolite    
+    su $GIT_USER -c "PATH=/opt/gitolite/bin:\$PATH && /opt/gitolite/bin/gl-setup -q /tmp/${NEW_USER}.pub"
+    
+    # Install gitolite admin.
+    cat ${NEW_USER_HOME}/.ssh/id_rsa.pub >> ${GIT_USER_HOME}/.ssh/authorized_keys
+    su $NEW_USER -c "git clone git@${DOMAIN}:gitolite-admin ~/gitolite-admin"
 fi
