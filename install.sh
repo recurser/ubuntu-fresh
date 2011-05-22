@@ -101,6 +101,7 @@ sudo aptitude install -y \
     mysql-server \
     nginx \
     openssh-blacklist \
+    openssh-server \
     openssl-blacklist \
     php5 \
     php-apc \
@@ -117,7 +118,7 @@ sudo aptitude install -y \
     ruby-dev \
     rvm \
     screen \
-    ssh-server \
+    ssh \
     ssl-cert \
     subversion \
     subversion-tools \
@@ -390,7 +391,7 @@ echo "###############################################################"
 echo
 
 ADD_GIT=0
-confirm "Would you like this server to host git repositories (http://${DOMAIN}/svn/)?"
+confirm "Would you like this server to host git repositories?"
 if [ $? -eq 1 ]; then
     ADD_GIT=1
 fi
