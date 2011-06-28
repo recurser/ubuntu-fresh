@@ -98,6 +98,7 @@ aptitude install -y \
     language-pack-ja \
     libapache2-mod-php5 \
     libapache2-mod-suphp \
+    libapache2-mod-rpaf \
     libapache2-svn \
     locate \
     memcached \
@@ -260,6 +261,9 @@ if [ ! -f /etc/apache2/sites-available/${DOMAIN} ]; then
     chmod -R g+w /var/www/${DOMAIN}/
     # Add phpinfo() just for kicks :)
     echo "<?= phpinfo() ?>" > /var/www/${DOMAIN}/info.php
+    
+    # Enable mod_rewrite
+    a2enmod rewrite headers expires
     
     /etc/init.d/apache2 restart
 fi
@@ -449,7 +453,14 @@ if [ $ADD_GIT -eq 1 ]; then
     chown -R git:git /opt/gitolite    
     su $GIT_USER -c "PATH=/opt/gitolite/bin:\$PATH && /opt/gitolite/bin/gl-setup -q /tmp/${NEW_USER}.pub"
     
-    # Install gitolite admin.
-    cat ${NEW_USER_HOME}/.ssh/id_rsa.pub >> ${GIT_USER_HOME}/.ssh/authorized_keys
-    su $NEW_USER -c "git clone git@${DOMAIN}:gitolite-admin ~/gitolite-admin"
+    # Install gitolite admin client.
+    su $NEW_USER -c "git clone git@${DOMAIN}:gitolite-admin.git ~/gitolite-admin"
+    
+    # Install git-daemon.
+    aptitude install git-daemon-run
+    sed -ri "s|exec chpst -ugitdaemon |exec chpst -ugitdaemon:gitolite |" /etc/sv/git-daemon/run
+    sed -ri "s|--base-path=/var/cache /var/cache/git|--base-path=${GIT_USER_HOME}/repositories ${GIT_USER_HOME}/repositories|" /etc/sv/git-daemon/run
+    cp ${CURR_DIR}/conf/git-daemon /etc/init.d/git-daemon
+    chmod a+x /etc/init.d/git-daemon
+    sudo /usr/sbin/update-rc.d git-daemon defaults
 fi
