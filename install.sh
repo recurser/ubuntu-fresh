@@ -103,9 +103,6 @@ aptitude install -y \
     locate \
     memcached \
     mercurial \
-    mysql-client\
-    mysql-common \
-    mysql-server \
     nginx \
     openssh-blacklist \
     openssh-server \
@@ -120,7 +117,6 @@ aptitude install -y \
     php5-imagick \
     php5-mcrypt \
     php5-memcache \
-    php5-mysql \
     ruby \
     ruby-dev \
     rvm \
@@ -315,6 +311,35 @@ fi
 
 #--------------------------------------------------------------------
 #
+# M Y S Q L
+#
+#--------------------------------------------------------------------
+
+
+echo
+echo
+echo "#############################################################"
+echo "#                                                           #"
+echo "#                         M Y S Q L                         #"
+echo "#                                                           #"
+echo "#  We can set up the server to run MySQL if you wish. If    #"
+echo "#  you are not sure, choose 'n'.                            #"
+echo "#                                                           #"
+echo "#############################################################"
+echo
+
+confirm "Would you like to install MySQL?"
+if [ $? -eq 1 ]; then
+    aptitude install -y \
+        mysql-client\
+        mysql-common \
+        mysql-server \
+        php5-mysql
+fi
+
+
+#--------------------------------------------------------------------
+#
 # S U B V E R S I O N
 #
 #--------------------------------------------------------------------
@@ -332,12 +357,8 @@ echo "#                                                           #"
 echo "#############################################################"
 echo
 
-ADD_SVN=0
 confirm "Would you like this server to host subversion repositories (http://${DOMAIN}/svn/)?"
 if [ $? -eq 1 ]; then
-    ADD_SVN=1
-fi
-if [ $ADD_SVN -eq 1 ]; then
     mkdir -p /opt/subversion/repositories
     # Apache config - over-write regular config with svn-specific one.
     cp ${CURR_DIR}/conf/apache-svn.conf /etc/apache2/sites-available/${DOMAIN}
@@ -398,12 +419,8 @@ echo "#                                                           #"
 echo "#############################################################"
 echo
 
-ADD_GIT=0
 confirm "Would you like this server to host git repositories?"
 if [ $? -eq 1 ]; then
-    ADD_GIT=1
-fi
-if [ $ADD_GIT -eq 1 ]; then
     # Add a 'git' user.
     GIT_USER=git
     cd /tmp
@@ -457,7 +474,7 @@ if [ $ADD_GIT -eq 1 ]; then
     su $NEW_USER -c "git clone git@${DOMAIN}:gitolite-admin.git ~/gitolite-admin"
     
     # Install git-daemon.
-    aptitude install git-daemon-run
+    aptitude install -y git-daemon-run
     sed -ri "s|exec chpst -ugitdaemon |exec chpst -ugitdaemon:gitolite |" /etc/sv/git-daemon/run
     sed -ri "s|--base-path=/var/cache /var/cache/git|--base-path=${GIT_USER_HOME}/repositories ${GIT_USER_HOME}/repositories|" /etc/sv/git-daemon/run
     cp ${CURR_DIR}/conf/git-daemon /etc/init.d/git-daemon
@@ -483,13 +500,8 @@ echo "#                                                           #"
 echo "#############################################################"
 echo
 
-ADD_GMAIL=0
 confirm "Would you like this server to send mail via your gmail account?"
 if [ $? -eq 1 ]; then
-    ADD_GMAIL=1
-fi
-if [ $ADD_GMAIL -eq 1 ]; then
-
     # Read in the gmail email address.
     while [ -z "$GMAIL_USER" ]; do
         read -p "What gmail address would you like to send email from? Please include @gmail.com. " GMAIL_USER
@@ -505,7 +517,7 @@ if [ $ADD_GMAIL -eq 1 ]; then
         read -p "What is the password for that account? " GMAIL_PASS
     done
     
-    aptitude install sendmail
+    aptitude install -y sendmail
     
     if [ ! -f /etc/mail/sendmail.mc.orig ]; then
         cp /etc/mail/sendmail.mc /etc/mail/sendmail.mc.orig
