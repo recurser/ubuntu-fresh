@@ -329,7 +329,7 @@ echo "#                                                           #"
 echo "#  We can set up the server to host subversion repositories #"
 echo "#  if you wish. If you are not sure, choose 'n'.            #"
 echo "#                                                           #"
-echo "###############################################################"
+echo "#############################################################"
 echo
 
 ADD_SVN=0
@@ -395,7 +395,7 @@ echo "#                                                           #"
 echo "#  We can set up the server to host git repositories if you #"
 echo "#  wish. If you are not sure, choose 'n'.                   #"
 echo "#                                                           #"
-echo "###############################################################"
+echo "#############################################################"
 echo
 
 ADD_GIT=0
@@ -415,7 +415,7 @@ if [ $ADD_GIT -eq 1 ]; then
     # Make sure the git user is alllowed to SSH.
     if [ `grep "AllowUsers.*git" /etc/ssh/sshd_config | wc -l` -eq 0 ]; then
         sed -ri "s|^(AllowUsers.*)$|\1 ${GIT_USER}|" /etc/ssh/sshd_config
-        sudo /etc/init.d/ssh restart
+        /etc/init.d/ssh restart
     fi;
     
     # Get the home directory of the git user.
@@ -462,5 +462,92 @@ if [ $ADD_GIT -eq 1 ]; then
     sed -ri "s|--base-path=/var/cache /var/cache/git|--base-path=${GIT_USER_HOME}/repositories ${GIT_USER_HOME}/repositories|" /etc/sv/git-daemon/run
     cp ${CURR_DIR}/conf/git-daemon /etc/init.d/git-daemon
     chmod a+x /etc/init.d/git-daemon
-    sudo /usr/sbin/update-rc.d git-daemon defaults
+    /usr/sbin/update-rc.d git-daemon defaults
+fi
+
+
+echo
+echo
+echo "#############################################################"
+echo "#                                                           #"
+echo "#                 E M A I L   S E N D I N G                 #"
+echo "#                                                           #"
+echo "#  We can set up the server to send email via gmail if you  #"
+echo "#  wish. This will require storing your gmail address and   #"
+echo "#  password on the server in plain text. If you are not     #"
+echo "#  sure, choose 'n'.                                        #"
+echo "#                                                           #"
+echo "# You can also use a non-@gmail.com address if as long as   #"
+echo "# it is set up through google apps for domains.             #"
+echo "#                                                           #"
+echo "#############################################################"
+echo
+
+ADD_GMAIL=0
+confirm "Would you like this server to send mail via your gmail account?"
+if [ $? -eq 1 ]; then
+    ADD_GMAIL=1
+fi
+if [ $ADD_GMAIL -eq 1 ]; then
+
+    # Read in the gmail email address.
+    while [ -z "$GMAIL_USER" ]; do
+        read -p "What gmail address would you like to send email from? Please include @gmail.com. " GMAIL_USER
+    done
+
+    # Read in the gmail email address.
+    while [ -z "$GMAIL_NAME" ]; do
+        read -p "What name would you like the email to be associated with? " GMAIL_NAME
+    done
+
+    # Read in the gmail password.
+    while [ -z "$GMAIL_PASS" ]; do
+        read -p "What is the password for that account? " GMAIL_PASS
+    done
+    
+    aptitude install sendmail
+    
+    if [ ! -f /etc/mail/sendmail.mc.orig ]; then
+        cp /etc/mail/sendmail.mc /etc/mail/sendmail.mc.orig
+    fi
+    
+    if [ `grep smtp.gmail.com /etc/mail/sendmail.mc | wc -l` -eq 0 ]; then
+        sed -ri "s|MAILER_DEFINITIONS|FEATURE(\`authinfo',\`hash /etc/mail/auth/client-info')dnl\nMAILER_DEFINITIONS|g" /etc/mail/sendmail.mc
+        echo -n "\n" >> /etc/mail/sendmail.mc
+        echo -n "define(\`SMART_HOST',\`smtp.gmail.com')dnl\n" >> /etc/mail/sendmail.mc
+        echo -n "define(\`confAUTH_MECHANISMS', \`EXTERNAL GSSAPI DIGEST-MD5 CRAM-MD5 LOGIN PLAIN')dnl\n" >> /etc/mail/sendmail.mc
+        echo -n "define(\`CERT_DIR', \`MAIL_SETTINGS_DIR\`'certs')\n" >> /etc/mail/sendmail.mc
+        echo -n "define(\`confCACERT_PATH', \`CERT_DIR')\n" >> /etc/mail/sendmail.mc
+        echo -n "define(\`confCACERT_PATH', \`CERT_DIR')\n" >> /etc/mail/sendmail.mc
+        echo -n "define(\`confCACERT', \`CERT_DIR/CAcert.pem')\n" >> /etc/mail/sendmail.mc
+        echo -n "define(\`confSERVER_CERT', \`CERT_DIR/gmailcert.pem')\n" >> /etc/mail/sendmail.mc
+        echo -n "define(\`confSERVER_KEY', \`CERT_DIR/gmailkey.pem')\n" >> /etc/mail/sendmail.mc
+        echo -n "define(\`confCLIENT_CERT', \`CERT_DIR/gmailcert.pem')\n" >> /etc/mail/sendmail.mc
+        echo -n "define(\`confCLIENT_KEY', \`CERT_DIR/gmailkey.pem')\n" >> /etc/mail/sendmail.mc
+    fi
+    
+    if [ ! -f /etc/mail/auth/client-info ];then
+        mkdir -p mkdir /etc/mail/auth
+        echo "AuthInfo:smtp.gmail.com \"U:${GMAIL_NAME}\" \"I:${GMAIL_USER}\" \"P:${GMAIL_PASS}\"\n" >> /etc/mail/auth/client-info
+        cd /etc/mail/auth/
+        makemap hash client-info < client-info
+        chmod 700 /etc/mail/auth
+        chmod 600 /etc/mail/auth/*
+    fi
+    
+    if [ ! -d /etc/mail/certs ];then
+        mkdir /etc/mail/certs
+        cd /etc/mail/certs
+        openssl dsaparam 1024 -out dsa1024 -out dsa1024.pem
+        openssl req -x509 -nodes -days 3650 -newkey dsa:dsa1024.pem -out /etc/mail/certs/gmailcert.pem -keyout /etc/mail/certs/gmailkey.pem
+        ln -s /etc/mail/certs/gmailcert.pem /etc/mail/certs/CAcert.pem
+        openssl req -x509 -new -days 3650 -key /etc/mail/certs/gmailkey.pem -out /etc/mail/certs/gmailcert.pem
+        chmod 700 /etc/mail/certs
+        chmod 600 /etc/mail/certs/*
+        cd /etc/mail
+        make
+    fi
+    
+    /etc/init.d/sendmail reload
+
 fi
