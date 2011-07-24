@@ -9,7 +9,7 @@ echo "Cloning ubuntu-fresh..."
 cd /tmp
 rm -Rf ubuntu-fresh
 git clone --recursive git://github.com/recurser/ubuntu-fresh.git
-cd fresh-ubuntu
+cd ubuntu-fresh
 
 echo "Installing..."
 ./install.sh
