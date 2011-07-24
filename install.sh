@@ -152,7 +152,7 @@ sed -ri "s|X11Forwarding yes|X11Forwarding no|" /etc/ssh/sshd_config
 sed -ri "s|UseDNS yes|UseDNS no|" /etc/ssh/sshd_config
 sed -ri "s|UsePAM yes|UsePAM no|" /etc/ssh/sshd_config
 if [ `grep PermitRootLogin /etc/ssh/sshd_config | wc -l` -eq 0 ]; then
-    echo -n "PermitRootLogin no\n" >> /etc/ssh/sshd_config
+    echo "PermitRootLogin no" >> /etc/ssh/sshd_config
 fi
 if [ `grep X11Forwarding /etc/ssh/sshd_config | wc -l` -eq 0 ]; then
     echo "X11Forwarding no" >> /etc/ssh/sshd_config
@@ -173,7 +173,7 @@ fi;
 # H O S T N A M E
 #
 #--------------------------------------------------------------------
-sed -ri "s|^127\.0\.0\.1[\s\t]+localhost.*$|127.0.0.1 localhost ${DOMAIN}|" /etc/hosts
+sed -ri "s|^(127\.0\.0\.1.*localhost.*)$|\1 ${DOMAIN}|" /etc/hosts
 /bin/hostname $DOMAIN
 
 
@@ -513,17 +513,17 @@ if [ $ADD_GMAIL -eq 1 ]; then
     
     if [ `grep smtp.gmail.com /etc/mail/sendmail.mc | wc -l` -eq 0 ]; then
         sed -ri "s|MAILER_DEFINITIONS|FEATURE(\`authinfo',\`hash /etc/mail/auth/client-info')dnl\nMAILER_DEFINITIONS|g" /etc/mail/sendmail.mc
-        echo -n "\n" >> /etc/mail/sendmail.mc
-        echo -n "define(\`SMART_HOST',\`smtp.gmail.com')dnl\n" >> /etc/mail/sendmail.mc
-        echo -n "define(\`confAUTH_MECHANISMS', \`EXTERNAL GSSAPI DIGEST-MD5 CRAM-MD5 LOGIN PLAIN')dnl\n" >> /etc/mail/sendmail.mc
-        echo -n "define(\`CERT_DIR', \`MAIL_SETTINGS_DIR\`'certs')\n" >> /etc/mail/sendmail.mc
-        echo -n "define(\`confCACERT_PATH', \`CERT_DIR')\n" >> /etc/mail/sendmail.mc
-        echo -n "define(\`confCACERT_PATH', \`CERT_DIR')\n" >> /etc/mail/sendmail.mc
-        echo -n "define(\`confCACERT', \`CERT_DIR/CAcert.pem')\n" >> /etc/mail/sendmail.mc
-        echo -n "define(\`confSERVER_CERT', \`CERT_DIR/gmailcert.pem')\n" >> /etc/mail/sendmail.mc
-        echo -n "define(\`confSERVER_KEY', \`CERT_DIR/gmailkey.pem')\n" >> /etc/mail/sendmail.mc
-        echo -n "define(\`confCLIENT_CERT', \`CERT_DIR/gmailcert.pem')\n" >> /etc/mail/sendmail.mc
-        echo -n "define(\`confCLIENT_KEY', \`CERT_DIR/gmailkey.pem')\n" >> /etc/mail/sendmail.mc
+        echo "" >> /etc/mail/sendmail.mc
+        echo "define(\`SMART_HOST',\`smtp.gmail.com')dnl" >> /etc/mail/sendmail.mc
+        echo "define(\`confAUTH_MECHANISMS', \`EXTERNAL GSSAPI DIGEST-MD5 CRAM-MD5 LOGIN PLAIN')dnl" >> /etc/mail/sendmail.mc
+        echo "define(\`CERT_DIR', \`MAIL_SETTINGS_DIR\`'certs')" >> /etc/mail/sendmail.mc
+        echo "define(\`confCACERT_PATH', \`CERT_DIR')" >> /etc/mail/sendmail.mc
+        echo "define(\`confCACERT_PATH', \`CERT_DIR')" >> /etc/mail/sendmail.mc
+        echo "define(\`confCACERT', \`CERT_DIR/CAcert.pem')" >> /etc/mail/sendmail.mc
+        echo "define(\`confSERVER_CERT', \`CERT_DIR/gmailcert.pem')" >> /etc/mail/sendmail.mc
+        echo "define(\`confSERVER_KEY', \`CERT_DIR/gmailkey.pem')" >> /etc/mail/sendmail.mc
+        echo "define(\`confCLIENT_CERT', \`CERT_DIR/gmailcert.pem')" >> /etc/mail/sendmail.mc
+        echo "define(\`confCLIENT_KEY', \`CERT_DIR/gmailkey.pem')" >> /etc/mail/sendmail.mc
     fi
     
     if [ ! -f /etc/mail/auth/client-info ];then
