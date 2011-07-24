@@ -5,10 +5,10 @@ if [ $(which git | wc -l) -eq 0 ]; then
     sudo aptitude -y install git-core
 fi
 
-echo "Cloning fresh-ubuntu..."
+echo "Cloning ubuntu-fresh..."
 cd /tmp
-rm -Rf fresh-ubuntu
-git clone --recursive git://github.com/recurser/fresh-ubuntu.git
+rm -Rf ubuntu-fresh
+git clone --recursive git://github.com/recurser/ubuntu-fresh.git
 cd fresh-ubuntu
 
 echo "Installing..."

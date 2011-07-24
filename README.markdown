@@ -1,4 +1,4 @@
 
 ## Installation
 
-exec 3<&1 && sh <&3 <(curl https://github.com/recurser/fresh-ubuntu/raw/master/bootstrap.sh)
+exec 3<&1 && sh <&3 <(curl https://raw.github.com/recurser/ubuntu-fresh/master/bootstrap.sh)
